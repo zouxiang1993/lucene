@@ -48,7 +48,7 @@ public final class SegmentReader extends CodecReader {
   // this is the original SI that IW uses internally but it's mutated behind the scenes
   // and we don't want this SI to be used for anything. Yet, IW needs this to do maintainance
   // and lookup pooled readers etc.
-  private final SegmentCommitInfo originalSi;
+  private final SegmentCommitInfo originalSi; // TODO: 看看这里为什么要区分si和originalSi
   private final LeafMetaData metaData;
   private final Bits liveDocs;
   private final Bits hardLiveDocs;

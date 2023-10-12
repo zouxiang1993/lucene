@@ -156,7 +156,7 @@ public final class CompressingStoredFieldsReader extends StoredFieldsReader {
       long maxPointer = -1;
       FieldsIndex indexReader = null;
 
-      if (version < VERSION_OFFHEAP_INDEX) {
+      if (version < VERSION_OFFHEAP_INDEX) { // 比较低的版本，LegacyFieldsIndexReader会把fdx整个索引文件加载进堆内存。
         // Load the index into memory
         final String indexName = IndexFileNames.segmentFileName(segment, segmentSuffix, "fdx");
         try (ChecksumIndexInput indexStream = d.openChecksumInput(indexName, context)) {
@@ -177,7 +177,7 @@ public final class CompressingStoredFieldsReader extends StoredFieldsReader {
             CodecUtil.checkFooter(indexStream, priorE);
           }
         }
-      } else {
+      } else { // 比较新的版本，FieldsIndexReader初始化时只读取少量meta数据，后续查询时再读磁盘。
         FieldsIndexReader fieldsIndexReader = new FieldsIndexReader(d, si.name, segmentSuffix, INDEX_EXTENSION, INDEX_CODEC_NAME, si.getId(), metaIn);
         indexReader = fieldsIndexReader;
         maxPointer = fieldsIndexReader.getMaxPointer();

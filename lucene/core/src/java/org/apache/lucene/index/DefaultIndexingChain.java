@@ -64,7 +64,7 @@ final class DefaultIndexingChain extends DocConsumer {
   final FieldInfos.Builder fieldInfos;
 
   // Writes postings and term vectors:
-  final TermsHash termsHash;
+  final TermsHash termsHash; // 这里的termsHash和下面的termVectorsWriter通过单向链表串联。
   // Writes stored fields
   final StoredFieldsConsumer storedFieldsConsumer;
   final TermVectorsConsumer termVectorsWriter;
@@ -91,7 +91,7 @@ final class DefaultIndexingChain extends DocConsumer {
   DefaultIndexingChain(int indexCreatedVersionMajor, SegmentInfo segmentInfo, Directory directory, FieldInfos.Builder fieldInfos, LiveIndexWriterConfig indexWriterConfig,
                        Consumer<Throwable> abortingExceptionConsumer) {
     this.indexCreatedVersionMajor = indexCreatedVersionMajor;
-    byteBlockAllocator = new ByteBlockPool.DirectTrackingAllocator(bytesUsed);
+    byteBlockAllocator = new ByteBlockPool.DirectTrackingAllocator(bytesUsed); // 这里的两个Allocator用于追踪内存使用量
     IntBlockPool.Allocator intBlockAllocator = new IntBlockAllocator(bytesUsed);
     this.indexWriterConfig = indexWriterConfig;
     assert segmentInfo.getIndexSort() == indexWriterConfig.getIndexSort();

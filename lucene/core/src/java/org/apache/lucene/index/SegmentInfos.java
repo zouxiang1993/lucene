@@ -115,6 +115,8 @@ import org.apache.lucene.util.Version;
  * </ul>
  * 
  * @lucene.experimental
+ *
+ * segment_N文件的内存表示
  */
 public final class SegmentInfos implements Cloneable, Iterable<SegmentCommitInfo> {
 

@@ -248,7 +248,7 @@ final class DocumentsWriterFlushControl implements Accountable, Closeable {
   private boolean updateStallState() {
     
     assert Thread.holdsLock(this);
-    final long limit = stallLimitBytes();
+    final long limit = stallLimitBytes(); // 默认配置是16M
     /*
      * we block indexing threads if net byte grows due to slow flushes
      * yet, for small ram buffers and large documents we can easily

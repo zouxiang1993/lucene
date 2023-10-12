@@ -147,7 +147,7 @@ public abstract class PerFieldPostingsFormat extends PostingsFormat {
     }
 
     @Override
-    public void write(Fields fields, NormsProducer norms) throws IOException {
+    public void write(Fields fields, NormsProducer norms) throws IOException { // 支持对不同field设置不同format的能力。一种format只构造一个实例。
       Map<PostingsFormat, FieldsGroup> formatToGroups = buildFieldsGroupMapping(fields);
 
       // Write postings

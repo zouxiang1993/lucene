@@ -404,7 +404,7 @@ final class DocumentsWriter implements Closeable, Accountable {
 
   long updateDocuments(final Iterable<? extends Iterable<? extends IndexableField>> docs,
                        final DocumentsWriterDeleteQueue.Node<?> delNode) throws IOException {
-    boolean hasEvents = preUpdate();
+    boolean hasEvents = preUpdate(); // 处理文档前的操作，主要是 flush & stall 相关
 
     final DocumentsWriterPerThread dwpt = flushControl.obtainAndLock();
     final DocumentsWriterPerThread flushingDWPT;
@@ -416,7 +416,7 @@ final class DocumentsWriter implements Closeable, Accountable {
       ensureOpen();
       final int dwptNumDocs = dwpt.getNumDocsInRAM();
       try {
-        seqNo = dwpt.updateDocuments(docs, delNode, flushNotifications);
+        seqNo = dwpt.updateDocuments(docs, delNode, flushNotifications);  // 处理文档
       } finally {
         if (dwpt.isAborted()) {
           flushControl.doOnAbort(dwpt);
@@ -437,7 +437,7 @@ final class DocumentsWriter implements Closeable, Accountable {
       assert dwpt.isHeldByCurrentThread() == false : "we didn't release the dwpt even on abort";
     }
 
-    if (postUpdate(flushingDWPT, hasEvents)) {
+    if (postUpdate(flushingDWPT, hasEvents)) {   // 处理文档之后的操作
       seqNo = -seqNo;
     }
     return seqNo;

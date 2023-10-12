@@ -55,14 +55,14 @@ import org.apache.lucene.codecs.perfield.PerFieldPostingsFormat;
  */
 public class Lucene87Codec extends Codec {
   private final TermVectorsFormat vectorsFormat = new Lucene50TermVectorsFormat();
-  private final FieldInfosFormat fieldInfosFormat = new Lucene60FieldInfosFormat();
-  private final SegmentInfoFormat segmentInfosFormat = new Lucene86SegmentInfoFormat();
-  private final LiveDocsFormat liveDocsFormat = new Lucene50LiveDocsFormat();
+  private final FieldInfosFormat fieldInfosFormat = new Lucene60FieldInfosFormat(); // DONE
+  private final SegmentInfoFormat segmentInfosFormat = new Lucene86SegmentInfoFormat(); // DONE
+  private final LiveDocsFormat liveDocsFormat = new Lucene50LiveDocsFormat();  // DONE: 全部读入内存FixedBitSet，每个文档一个bit
   private final CompoundFormat compoundFormat = new Lucene50CompoundFormat();
   private final PointsFormat pointsFormat = new Lucene86PointsFormat();
   private final PostingsFormat defaultFormat;
 
-  private final PostingsFormat postingsFormat = new PerFieldPostingsFormat() {
+  private final PostingsFormat postingsFormat = new PerFieldPostingsFormat() {  // TODO: 倒排索引
     @Override
     public PostingsFormat getPostingsFormatForField(String field) {
       return Lucene87Codec.this.getPostingsFormatForField(field);
@@ -76,7 +76,7 @@ public class Lucene87Codec extends Codec {
     }
   };
 
-  private final StoredFieldsFormat storedFieldsFormat;
+  private final StoredFieldsFormat storedFieldsFormat;   // TODO:
 
   /**
    * Instantiates a new codec.

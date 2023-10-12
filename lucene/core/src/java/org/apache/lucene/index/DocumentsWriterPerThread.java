@@ -136,7 +136,7 @@ final class DocumentsWriterPerThread implements Accountable {
 
   private final FieldInfos.Builder fieldInfos;
   private final InfoStream infoStream;
-  private int numDocsInRAM;
+  private int numDocsInRAM; // 记录内存中doc的数量，也用来生成doc id
   final DocumentsWriterDeleteQueue deleteQueue;
   private final DeleteSlice deleteSlice;
   private final NumberFormat nf = NumberFormat.getInstance(Locale.ROOT);
@@ -205,7 +205,7 @@ final class DocumentsWriterPerThread implements Accountable {
           // it's very hard to fix (we can't easily distinguish aborting
           // vs non-aborting exceptions):
           reserveOneDoc();
-          consumer.processDocument(numDocsInRAM++, doc);
+          consumer.processDocument(numDocsInRAM++, doc);  // numDocsInRAM++ 生成新的doc id
         }
         allDocsIndexed = true;
         return finishDocuments(deleteNode, docsInRamBefore);

@@ -46,7 +46,10 @@ import org.apache.lucene.util.IOUtils;
 /** Holds core readers that are shared (unchanged) when
  * SegmentReader is cloned or reopened */
 final class SegmentCoreReaders {
-
+/*
+SegmentCoreReaders中包含了所有不可变的对象: FieldsProducer StoredFieldsReader PointsReader ..
+可变对象: .liv doc_values 在SegmentReader中。
+ */
   // Counts how many other readers share the core objects
   // (freqStream, proxStream, tis, etc.) of this reader;
   // when coreRef drops to 0, these core objects may be
@@ -72,7 +75,7 @@ final class SegmentCoreReaders {
   // TODO: make a single thread local w/ a
   // Thingy class holding fieldsReader, termVectorsReader,
   // normsProducer
-
+// TODO: 为什么fieldsReader就需要ThreadLocal呢？
   final CloseableThreadLocal<StoredFieldsReader> fieldsReaderLocal = new CloseableThreadLocal<StoredFieldsReader>() {
     @Override
     protected StoredFieldsReader initialValue() {

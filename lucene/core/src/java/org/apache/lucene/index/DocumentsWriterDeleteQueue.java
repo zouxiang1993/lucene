@@ -399,7 +399,7 @@ final class DocumentsWriterDeleteQueue implements Accountable, Closeable {
     }
   }
 
-  static class Node<T> {
+  static class Node<T> { // 链表结构，每个Node表示一个删除的信息
     volatile Node<?> next;
     final T item;
 

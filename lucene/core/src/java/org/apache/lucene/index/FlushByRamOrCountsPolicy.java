@@ -58,7 +58,7 @@ class FlushByRamOrCountsPolicy extends FlushPolicy {
   @Override
   public void onDelete(DocumentsWriterFlushControl control, DocumentsWriterPerThread perThread) {
     if ((flushOnRAM() && control.getDeleteBytesUsed() > 1024*1024*indexWriterConfig.getRAMBufferSizeMB())) {
-      control.setApplyAllDeletes();
+      control.setApplyAllDeletes();  // 1. 如果delete占用的内存达到阈值，则apply所有delete
       if (infoStream.isEnabled("FP")) {
         infoStream.message("FP", "force apply deletes bytesUsed=" + control.getDeleteBytesUsed() + " vs ramBufferMB=" + indexWriterConfig.getRAMBufferSizeMB());
       }
@@ -71,7 +71,7 @@ class FlushByRamOrCountsPolicy extends FlushPolicy {
         && perThread.getNumDocsInRAM() >= indexWriterConfig
             .getMaxBufferedDocs()) {
       // Flush this state by num docs
-      control.setFlushPending(perThread);
+      control.setFlushPending(perThread); // 2. 如果一个DWPT内的文档数达到阈值，则标记flush
     } else if (flushOnRAM()) {// flush by RAM
       final long limit = (long) (indexWriterConfig.getRAMBufferSizeMB() * 1024.d * 1024.d);
       final long totalRam = control.activeBytes() + control.getDeleteBytesUsed();
@@ -79,7 +79,7 @@ class FlushByRamOrCountsPolicy extends FlushPolicy {
         if (infoStream.isEnabled("FP")) {
           infoStream.message("FP", "trigger flush: activeBytes=" + control.activeBytes() + " deleteBytes=" + control.getDeleteBytesUsed() + " vs limit=" + limit);
         }
-        markLargestWriterPending(control, perThread);
+        markLargestWriterPending(control, perThread); // 3. 如果所有DWPT使用的总内存达到阈值，则将最大的DWPT标记flush
       }
     }
   }

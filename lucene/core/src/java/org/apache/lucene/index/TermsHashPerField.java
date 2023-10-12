@@ -174,7 +174,7 @@ abstract class TermsHashPerField implements Comparable<TermsHashPerField> {
     // We are first in the chain so we must "intern" the
     // term text into textStart address
     // Get the text & hash of this term.
-    int termID = bytesHash.add(termBytes);
+    int termID = bytesHash.add(termBytes); // 从 term 到 termID
     //System.out.println("add term=" + termBytesRef.utf8ToString() + " doc=" + docState.docID + " termID=" + termID);
     if (termID >= 0) { // New posting
       // Init stream slices

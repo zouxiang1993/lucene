@@ -976,7 +976,7 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable,
         // segments_N file with no segments:
         final SegmentInfos sis = new SegmentInfos(config.getIndexCreatedVersionMajor());
         if (indexExists) {
-          final SegmentInfos previous = SegmentInfos.readLatestCommit(directory);
+          final SegmentInfos previous = SegmentInfos.readLatestCommit(directory); // 读取最新的segment_N文件
           sis.updateGenerationVersionAndCounter(previous);
         }
         segmentInfos = sis;
@@ -5619,7 +5619,7 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable,
         BufferedUpdatesStream.SegmentState[] segStates;
 
         synchronized (this) {
-          List<SegmentCommitInfo> infos = getInfosToApply(updates);
+          List<SegmentCommitInfo> infos = getInfosToApply(updates); // 先理解为这里会对之前所有的segment进行apply
           if (infos == null) {
             break;
           }

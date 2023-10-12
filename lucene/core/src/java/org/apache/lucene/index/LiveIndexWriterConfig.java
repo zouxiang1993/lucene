@@ -104,7 +104,7 @@ public class LiveIndexWriterConfig {
   protected Set<String> indexSortFields = Collections.emptySet();
 
   /** if an indexing thread should check for pending flushes on update in order to help out on a full flush*/
-  protected volatile boolean checkPendingFlushOnUpdate = true;
+  protected volatile boolean checkPendingFlushOnUpdate = true; // 如果对写入的延时要求比较高，那这个可能要关闭？
 
   /** soft deletes field */
   protected String softDeletesField = null;
