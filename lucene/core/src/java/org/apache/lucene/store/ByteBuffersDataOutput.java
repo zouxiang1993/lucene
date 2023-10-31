@@ -36,6 +36,10 @@ import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.RamUsageEstimator;
 import org.apache.lucene.util.UnicodeUtil;
 
+/*
+把数据输出到多个 ByteBuffer中。是在堆内分配内存，动态扩展
+TODO: 有需要再看具体实现  & ByteBufferRecycler 是如何回收的？
+ */
 /**
  * A {@link DataOutput} storing data in a list of {@link ByteBuffer}s.
  */

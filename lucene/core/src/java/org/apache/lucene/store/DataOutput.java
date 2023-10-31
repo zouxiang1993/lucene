@@ -32,7 +32,7 @@ import org.apache.lucene.util.BytesRef;
  * thread safe (it keeps internal state like file position).
  */
 public abstract class DataOutput {
-
+  // Lucene只支持顺序写
   /** Writes a single byte.
    * <p>
    * The most primitive data type is an eight-bit byte. Files are 
@@ -200,6 +200,7 @@ public abstract class DataOutput {
    */
   public final void writeZInt(int i) throws IOException {
     writeVInt(BitUtil.zigZagEncode(i));
+    // 对于负数来说，第1个bit肯定是1，如果直接writeVInt会很长。这里先用zigzag将负数映射为正数，再writeVInt
   }
 
   /** Writes a long as eight bytes.

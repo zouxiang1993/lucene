@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+/*
+给IndexInput实现了缓冲功能，加了一个buffer，buffer size可调整，对非mmap的顺序读的场景应该会比较有用。
+ */
 /** Base implementation class for buffered {@link IndexInput}. */
 public abstract class BufferedIndexInput extends IndexInput implements RandomAccessInput {
 

@@ -107,6 +107,9 @@ public abstract class DirectoryReader extends BaseCompositeReader<LeafReader> {
    *  {@link IndexCommit}.
    * @param commit the commit point to open
    * @throws IOException if there is a low-level IO error
+   *
+   * ES创建snapshot时就是调用的这个方法
+   * org.elasticsearch.snapshots.SourceOnlySnapshot#syncSnapshot
    */
   public static DirectoryReader open(final IndexCommit commit) throws IOException {
    return StandardDirectoryReader.open(commit.getDirectory(), commit);

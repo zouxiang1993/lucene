@@ -602,7 +602,7 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable,
       synchronized (fullFlushLock) {
         try {
           // TODO: should we somehow make the seqNo available in the returned NRT reader?
-          anyChanges = docWriter.flushAllThreads() < 0;
+          anyChanges = docWriter.flushAllThreads() < 0; // flush 所有 DWPT
           if (anyChanges == false) {
             // prevent double increment since docWriter#doFlush increments the flushcount
             // if we flushed anything.
@@ -612,7 +612,7 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable,
           processEvents(false);
 
           if (applyAllDeletes) {
-            applyAllDeletesAndUpdates();
+            applyAllDeletesAndUpdates();  // 将所有的 delete 和 update 应用到 ReaderPool中的 ReadersAndUpdates中
           }
           synchronized(this) {
 
@@ -621,7 +621,7 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable,
 
             // TODO: we could instead just clone SIS and pull/incref readers in sync'd block, and then do this w/o IW's lock?
             // Must do this sync'd on IW to prevent a merge from completing at the last second and failing to write its DV updates:
-            writeReaderPool(writeAllDeletes);
+            writeReaderPool(writeAllDeletes); // 将 ReaderPool中的更新刷到磁盘
 
             // Prevent segmentInfos from changing while opening the
             // reader; in theory we could instead do similar retry logic,
@@ -630,7 +630,7 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable,
             if (infoStream.isEnabled("IW")) {
               infoStream.message("IW", "return reader version=" + r.getVersion() + " reader=" + r);
             }
-            if (maxFullFlushMergeWaitMillis > 0) {
+            if (maxFullFlushMergeWaitMillis > 0) { // 这个配置默认是0，先忽略这段，后面再看看有什么用
               // we take the SIS from the reader which has already pruned away fully deleted readers
               // this makes pulling the readers below after the merge simpler since we can be safe that
               // they are not closed. Every segment has a corresponding SR in the SDR we opened if we use
@@ -1024,7 +1024,7 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable,
         }
 
         rollbackSegments = lastCommit.createBackupSegmentInfos();
-      } else {
+      } else {  // 这里是比较关键的分支
         // Init from either the latest commit point, or an explicit prior commit point:
 
         String lastSegmentsFile = SegmentInfos.getLastCommitSegmentsFileName(files);
@@ -1076,7 +1076,7 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable,
           enableTestPoints, this::newSegmentName,
           config, directoryOrig, directory, globalFieldNumberMap);
       readerPool = new ReaderPool(directory, directoryOrig, segmentInfos, globalFieldNumberMap,
-          bufferedUpdatesStream::getCompletedDelGen, infoStream, conf.getSoftDeletesField(), reader);
+          bufferedUpdatesStream::getCompletedDelGen, infoStream, conf.getSoftDeletesField(), reader); // 一般情况下，这里的reader应该为null
       if (config.getReaderPooling()) {
         readerPool.enableReaderPooling();
       }
@@ -2285,8 +2285,8 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable,
 
   private final void maybeMerge(MergePolicy mergePolicy, MergeTrigger trigger, int maxNumSegments) throws IOException {
     ensureOpen(false);
-    if (updatePendingMerges(mergePolicy, trigger, maxNumSegments) != null) {
-      executeMerge(trigger);
+    if (updatePendingMerges(mergePolicy, trigger, maxNumSegments) != null) { // 1. 找出merge
+      executeMerge(trigger); // 2. 执行merge
     }
   }
 

@@ -23,6 +23,10 @@ import org.apache.lucene.util.Accountable;
 import org.apache.lucene.util.ArrayUtil;
 import org.apache.lucene.util.UnicodeUtil;
 
+/*
+把数据输出到一个byte[]中，但是长度可动态增长。
+注意拷贝带来的开销。优先使用定长的 ByteArrayDataOutput
+ */
 /**
  * A {@link DataOutput} that can be used to build a byte[].
  *

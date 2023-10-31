@@ -19,6 +19,9 @@ package org.apache.lucene.store;
 
 import org.apache.lucene.util.BytesRef;
 
+/*
+把数据输出到一个byte[]中
+ */
 /**
  * DataOutput backed by a byte array.
  * <b>WARNING:</b> This class omits most low-level checks,

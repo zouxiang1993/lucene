@@ -26,6 +26,12 @@ import static org.apache.lucene.util.ByteBlockPool.BYTE_BLOCK_MASK;
 import static org.apache.lucene.util.ByteBlockPool.BYTE_BLOCK_SHIFT;
 import static org.apache.lucene.util.ByteBlockPool.BYTE_BLOCK_SIZE;
 
+/*
+相当于HashMap<BytesRef, int>的功能。
+每次调用{@link #add(BytesRef)}时
+  - 如果不存在，则返回一个递增的id
+  - 如果存在，则返回 (-(id)-1)
+ */
 /**
  * {@link BytesRefHash} is a special purpose hash-map like data-structure
  * optimized for {@link BytesRef} instances. BytesRefHash maintains mappings of
@@ -42,10 +48,6 @@ import static org.apache.lucene.util.ByteBlockPool.BYTE_BLOCK_SIZE;
  * 
  * @lucene.internal
  *
- * 相当于HashMap<BytesRef, int>的功能。
- * 每次调用{@link #add(BytesRef)}时
- *  - 如果不存在，则返回一个递增的id
- *  - 如果存在，则返回 (-(id)-1)
  */
 public final class BytesRefHash implements Accountable {
   private static final long BASE_RAM_BYTES = RamUsageEstimator.shallowSizeOfInstance(BytesRefHash.class) +

@@ -19,6 +19,9 @@ package org.apache.lucene.store;
 
 import java.io.*;
 
+/*
+把数据输出到一个 OutputStream 中
+ */
 /**
  * A {@link DataOutput} wrapping a plain {@link OutputStream}.
  */

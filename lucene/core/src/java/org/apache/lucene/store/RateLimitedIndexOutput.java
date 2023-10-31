@@ -19,12 +19,13 @@ package org.apache.lucene.store;
 
 import java.io.IOException;
 
+// TODO: 看看这个是如何限制merge时磁盘写入的速度的？ES中是否有可能用到？
+
 /**
  * A {@link RateLimiter rate limiting} {@link IndexOutput}
  * 
  * @lucene.internal
  */
-
 public final class RateLimitedIndexOutput extends IndexOutput {
   
   private final IndexOutput delegate;

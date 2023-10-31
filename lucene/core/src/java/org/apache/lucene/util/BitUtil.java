@@ -169,6 +169,7 @@ public final class BitUtil {
     * encode the provided long. Assuming the input is a signed long whose
     * absolute value can be stored on <tt>n</tt> bits, the returned value will
     * be an unsigned long that can be stored on <tt>n+1</tt> bits.
+    * 将 n bits 的有符号整数映射为 n+1 bits 的无符号整数
     */
    public static long zigZagEncode(long l) {
      return (l >> 63) ^ (l << 1);
