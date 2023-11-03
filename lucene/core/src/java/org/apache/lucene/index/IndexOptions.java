@@ -45,7 +45,7 @@ public enum IndexOptions {
    * This is a typical default for full-text search: full scoring is enabled
    * and positional queries are supported.
    */
-  DOCS_AND_FREQS_AND_POSITIONS,
+  DOCS_AND_FREQS_AND_POSITIONS, // position默认开启是否合适？可能大部分业务场景下都不需要position？
   /** 
    * Indexes documents, frequencies, positions and offsets.
    * Character offsets are encoded alongside the positions. 

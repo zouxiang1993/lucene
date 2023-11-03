@@ -55,11 +55,11 @@ import static org.apache.lucene.search.DocIdSetIterator.NO_MORE_DOCS;
 public final class CompressingStoredFieldsWriter extends StoredFieldsWriter {
 
   /** Extension of stored fields file */
-  public static final String FIELDS_EXTENSION = "fdt";
+  public static final String FIELDS_EXTENSION = "fdt"; // 字段值
   /** Extension of stored fields index */
-  public static final String INDEX_EXTENSION = "fdx";
+  public static final String INDEX_EXTENSION = "fdx";  // 索引
   /** Extension of stored fields meta */
-  public static final String META_EXTENSION = "fdm";
+  public static final String META_EXTENSION = "fdm";   // 元数据
   /** Codec name for the index. */
   public static final String INDEX_CODEC_NAME = "Lucene85FieldsIndex";
 
@@ -108,7 +108,7 @@ public final class CompressingStoredFieldsWriter extends StoredFieldsWriter {
     this.chunkSize = chunkSize;
     this.maxDocsPerChunk = maxDocsPerChunk;
     this.docBase = 0;
-    this.bufferedDocs = ByteBuffersDataOutput.newResettableInstance();
+    this.bufferedDocs = ByteBuffersDataOutput.newResettableInstance(); // TODO: 看看具体的实现
     this.numStoredFields = new int[16];
     this.endOffsets = new int[16];
     this.numBufferedDocs = 0;
@@ -156,13 +156,13 @@ public final class CompressingStoredFieldsWriter extends StoredFieldsWriter {
 
   @Override
   public void finishDocument() throws IOException {
-    if (numBufferedDocs == this.numStoredFields.length) {
+    if (numBufferedDocs == this.numStoredFields.length) { // this.numStoredFields.length 初始长度16，这里会增长
       final int newLength = ArrayUtil.oversize(numBufferedDocs + 1, 4);
       this.numStoredFields = ArrayUtil.growExact(this.numStoredFields, newLength);
       endOffsets = ArrayUtil.growExact(endOffsets, newLength);
     }
     this.numStoredFields[numBufferedDocs] = numStoredFieldsInDoc;
-    numStoredFieldsInDoc = 0;
+    numStoredFieldsInDoc = 0; // 这里为什么用numStoredFieldsInDoc来记录文档中的字段数，而不是直接在numStoredFields[numBufferedDocs]中累加呢？是因为这样访存速度会更快吗？
     endOffsets[numBufferedDocs] = Math.toIntExact(bufferedDocs.size());
     ++numBufferedDocs;
     if (triggerFlush()) {
@@ -434,6 +434,7 @@ public final class CompressingStoredFieldsWriter extends StoredFieldsWriter {
    * </ul>
    */
   // T for "timestamp"
+  // 对表示时间的long做了特殊的压缩处理，占据更少的字节。
   static void writeTLong(DataOutput out, long l) throws IOException {
     int header; 
     if (l % SECOND != 0) {

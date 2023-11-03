@@ -88,7 +88,7 @@ public final class CompressingStoredFieldsReader extends StoredFieldsReader {
   private final CompressionMode compressionMode;
   private final Decompressor decompressor;
   private final int numDocs;
-  private final boolean merging;
+  private final boolean merging; // TODO: 下次看堆dump分析时，注意看下这个merging区分的两类CompressingStoredFieldsReader占比？
   private final BlockState state;
   private final long numDirtyChunks; // number of incomplete compressed blocks written
   private final long numDirtyDocs; // cumulative number of missing docs in incomplete chunks
@@ -130,7 +130,7 @@ public final class CompressingStoredFieldsReader extends StoredFieldsReader {
       version = CodecUtil.checkIndexHeader(fieldsStream, formatName, VERSION_START, VERSION_CURRENT, si.getId(), segmentSuffix);
       assert CodecUtil.indexHeaderLength(formatName, segmentSuffix) == fieldsStream.getFilePointer();
 
-      if (version >= VERSION_OFFHEAP_INDEX) {
+      if (version >= VERSION_OFFHEAP_INDEX) { // OFFHEAP_INDEX，应该是指 .fdx文件不全读入内存，只把.fdm读入内存，.fdx按需读取。
         final String metaStreamFN = IndexFileNames.segmentFileName(segment, segmentSuffix, META_EXTENSION);
         metaIn = d.openChecksumInput(metaStreamFN, IOContext.READONCE);
         CodecUtil.checkIndexHeader(metaIn, INDEX_CODEC_NAME + "Meta", META_VERSION_START, version, si.getId(), segmentSuffix);
@@ -400,13 +400,13 @@ public final class CompressingStoredFieldsReader extends StoredFieldsReader {
     // whether the block has been sliced, this happens for large documents
     private boolean sliced;
 
-    private long[] offsets = LongsRef.EMPTY_LONGS;
-    private long[] numStoredFields = LongsRef.EMPTY_LONGS;
+    private long[] offsets = LongsRef.EMPTY_LONGS; // 对应.fdt文件，一个chunk中的lengths
+    private long[] numStoredFields = LongsRef.EMPTY_LONGS; // 对应.fdt文件，一个chunk中的numStoredFields
 
     // the start pointer at which you can read the compressed documents
     private long startPointer;
 
-    private final BytesRef spare;
+    private final BytesRef spare; // 这里的spare和bytes只有在merging的时候才会用到。
     private final BytesRef bytes;
 
     BlockState() {
@@ -443,7 +443,7 @@ public final class CompressingStoredFieldsReader extends StoredFieldsReader {
       }
     }
 
-    private void doReset(int docID) throws IOException {
+    private void doReset(int docID) throws IOException { // 将.fdt中的一个chunk的 numStoredFields 和 offsets(或者叫lengths) 加载进内存
       docBase = fieldsStream.readVInt();
       final int token = fieldsStream.readVInt();
       chunkDocs = token >>> 1;
@@ -567,7 +567,7 @@ public final class CompressingStoredFieldsReader extends StoredFieldsReader {
       } else if (sliced) {
         fieldsStream.seek(startPointer);
         decompressor.decompress(fieldsStream, chunkSize, offset, Math.min(length, chunkSize - offset), bytes);
-        documentInput = new DataInput() {
+        documentInput = new DataInput() { // 封装连续读多个chunk生成一个完整doc的documentInput
 
           int decompressed = bytes.length;
 
@@ -604,7 +604,7 @@ public final class CompressingStoredFieldsReader extends StoredFieldsReader {
           }
 
         };
-      } else {
+      } else { // doc在单个chunk内
         fieldsStream.seek(startPointer);
         decompressor.decompress(fieldsStream, totalLength, offset, length, bytes);
         assert bytes.length == length;
@@ -647,7 +647,7 @@ public final class CompressingStoredFieldsReader extends StoredFieldsReader {
           if (fieldIDX == doc.numStoredFields - 1) {// don't skipField on last field value; treat like STOP
             return;
           }
-          skipField(doc.in, bits);
+          skipField(doc.in, bits); // skipField 肯定比 readField 性能好。尽量返回少的字段。
           break;
         case STOP:
           return;

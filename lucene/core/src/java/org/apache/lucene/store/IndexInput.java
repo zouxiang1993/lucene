@@ -39,6 +39,7 @@ import java.io.IOException;
  *
  * @see Directory
  */
+// 注意: IndexInput不是线程安全的。
 public abstract class IndexInput extends DataInput implements Cloneable,Closeable {
 
   private final String resourceDescription;

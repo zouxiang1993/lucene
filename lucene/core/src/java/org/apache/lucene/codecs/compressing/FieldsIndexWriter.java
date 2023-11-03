@@ -107,7 +107,7 @@ public final class FieldsIndexWriter implements Closeable {
     try (IndexOutput dataOut = dir.createOutput(IndexFileNames.segmentFileName(name, suffix, extension), ioContext)) {
       CodecUtil.writeIndexHeader(dataOut, codecName + "Idx", VERSION_CURRENT, id, suffix);
 
-      metaOut.writeInt(numDocs);
+      metaOut.writeInt(numDocs);  // 注意这里写的是 .fdm，不是 .fdx
       metaOut.writeInt(blockShift);
       metaOut.writeInt(totalChunks + 1);
       metaOut.writeLong(dataOut.getFilePointer());
