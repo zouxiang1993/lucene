@@ -168,8 +168,8 @@ class SortedDocValuesWriter extends DocValuesWriter<SortedDocValues> {
   private static class BufferedSortedDocValues extends SortedDocValues {
     final BytesRefHash hash;
     final BytesRef scratch = new BytesRef();
-    final int[] sortedValues;
-    final int[] ordMap;
+    final int[] sortedValues; // 数组下标是term的排序值ord(按字典序生成), 数组元素是termId(按文档写入的顺序生成)。
+    final int[] ordMap; // 数组下标是termId, 数组元素是ord值。就是把sortedValues的下标和数组元素调换了一下。
     final int valueCount;
     private int ord;
     final PackedLongValues.Iterator iter;

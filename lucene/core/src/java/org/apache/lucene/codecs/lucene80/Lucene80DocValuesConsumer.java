@@ -93,7 +93,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
     boolean success = false;
     try {
       if (meta != null) {
-        meta.writeInt(-1); // write EOF marker
+        meta.writeInt(-1); // write EOF marker   正常来说这里接下来一个fieldNumber, 用-1来表示已经没有其他字段了
         CodecUtil.writeFooter(meta); // write checksum
       }
       if (data != null) {
@@ -118,13 +118,13 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
     writeValues(field, new EmptyDocValuesProducer() {
       @Override
       public SortedNumericDocValues getSortedNumeric(FieldInfo field) throws IOException {
-        return DocValues.singleton(valuesProducer.getNumeric(field));
+        return DocValues.singleton(valuesProducer.getNumeric(field)); // 将NumericDocValues 转换成 SortedNumericDocValues 再写入，两者逻辑统一
       }
     });
   }
 
   private static class MinMaxTracker {
-    long min, max, numValues, spaceInBits;
+    long min, max, numValues, spaceInBits; // spaceInBits表示这个block内记录所有value所需要的bit数
 
     MinMaxTracker() {
       reset();
@@ -148,7 +148,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
     void finish() {
       if (max > min) {
         spaceInBits += DirectWriter.unsignedBitsRequired(max - min) * numValues;
-      }
+      } // 如果 min == max，则这个block只需要记录一个min值，不需要分别记录每个value，即 spaceInBits += 0
     }
 
     /** Update space usage and get ready for accumulating values for the next block. */
@@ -160,11 +160,11 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
 
   private long[] writeValues(FieldInfo field, DocValuesProducer valuesProducer) throws IOException {
     SortedNumericDocValues values = valuesProducer.getSortedNumeric(field);
-    int numDocsWithValue = 0;
+    int numDocsWithValue = 0; // 至少有1个value的文档数
     MinMaxTracker minMax = new MinMaxTracker();
     MinMaxTracker blockMinMax = new MinMaxTracker();
-    long gcd = 0;
-    Set<Long> uniqueValues = new HashSet<>();
+    long gcd = 0; // 所有value的最大公约数
+    Set<Long> uniqueValues = new HashSet<>(); // 用于统计unique value总数 < 256时的所有唯一值
     for (int doc = values.nextDoc(); doc != DocIdSetIterator.NO_MORE_DOCS; doc = values.nextDoc()) {
       for (int i = 0, count = values.docValueCount(); i < count; ++i) {
         long v = values.nextValue();
@@ -203,13 +203,13 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
     long min = minMax.min;
     final long max = minMax.max;
     assert blockMinMax.spaceInBits <= minMax.spaceInBits;
-
-    if (numDocsWithValue == 0) {              // meta[-2, 0]: No documents with values
+// docsWithField: 可能不是所有文档都有这个字段值，这种情况下，要记录哪些doc id有值。
+    if (numDocsWithValue == 0) {              // meta[-2, 0]: No documents with values 所有文档都没有值，可以特殊优化
       meta.writeLong(-2); // docsWithFieldOffset
       meta.writeLong(0L); // docsWithFieldLength
       meta.writeShort((short) -1); // jumpTableEntryCount
       meta.writeByte((byte) -1);   // denseRankPower
-    } else if (numDocsWithValue == maxDoc) {  // meta[-1, 0]: All documents has values
+    } else if (numDocsWithValue == maxDoc) {  // meta[-1, 0]: All documents has values 所有文档都有值，可以特殊优化
       meta.writeLong(-1); // docsWithFieldOffset
       meta.writeLong(0L); // docsWithFieldLength
       meta.writeShort((short) -1); // jumpTableEntryCount
@@ -218,7 +218,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
       long offset = data.getFilePointer();
       meta.writeLong(offset);// docsWithFieldOffset
       values = valuesProducer.getSortedNumeric(field);
-      final short jumpTableEntryCount = IndexedDISI.writeBitSet(values, data, IndexedDISI.DEFAULT_DENSE_RANK_POWER);
+      final short jumpTableEntryCount = IndexedDISI.writeBitSet(values, data, IndexedDISI.DEFAULT_DENSE_RANK_POWER); // 在.dvd中写入所有有值的doc id
       meta.writeLong(data.getFilePointer() - offset); // docsWithFieldLength
       meta.writeShort(jumpTableEntryCount);
       meta.writeByte(IndexedDISI.DEFAULT_DENSE_RANK_POWER);
@@ -228,14 +228,14 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
     final int numBitsPerValue;
     boolean doBlocks = false;
     Map<Long, Integer> encode = null;
-    if (min >= max) {                         // meta[-1]: All values are 0
+    if (min >= max) {                         // meta[-1]: All values are 0  这个分支是指所有value都相等，此时只需要在meta中记录min值
       numBitsPerValue = 0;
       meta.writeInt(-1); // tablesize
     } else {
       if (uniqueValues != null
           && uniqueValues.size() > 1
           && DirectWriter.unsignedBitsRequired(uniqueValues.size() - 1) < DirectWriter.unsignedBitsRequired((max - min) / gcd)) {
-        numBitsPerValue = DirectWriter.unsignedBitsRequired(uniqueValues.size() - 1);
+        numBitsPerValue = DirectWriter.unsignedBitsRequired(uniqueValues.size() - 1); // TODO: 这里应该在上面缓存numBitsPerValue的结果，减少一次调用
         final Long[] sortedUniqueValues = uniqueValues.toArray(new Long[0]);
         Arrays.sort(sortedUniqueValues);
         meta.writeInt(sortedUniqueValues.length); // tablesize
@@ -251,6 +251,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
       } else {
         uniqueValues = null;
         // we do blocks if that appears to save 10+% storage
+        // doBlocks为true时表示分多个block，为false时表示只有1个block。主要是为了节省存储空间，比如有时候一个block内的所有value都相同。
         doBlocks = minMax.spaceInBits > 0 && (double) blockMinMax.spaceInBits / minMax.spaceInBits <= 0.9;
         if (doBlocks) {
           numBitsPerValue = 0xFF;
@@ -587,7 +588,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
       meta.writeLong(0L); // ordsOffset
       meta.writeLong(0L); // ordsLength
     } else {
-      int numberOfBitsPerOrd = DirectWriter.unsignedBitsRequired(values.getValueCount() - 1);
+      int numberOfBitsPerOrd = DirectWriter.unsignedBitsRequired(values.getValueCount() - 1); // Ords部分每个文档占据相同的bits
       meta.writeByte((byte) numberOfBitsPerOrd); // bitsPerValue
       long start = data.getFilePointer();
       meta.writeLong(start); // ordsOffset

@@ -164,7 +164,7 @@ public final class Lucene80DocValuesFormat extends DocValuesFormat {
   static final int DIRECT_MONOTONIC_BLOCK_SHIFT = 16;
 
   static final int NUMERIC_BLOCK_SHIFT = 14;
-  static final int NUMERIC_BLOCK_SIZE = 1 << NUMERIC_BLOCK_SHIFT;
+  static final int NUMERIC_BLOCK_SIZE = 1 << NUMERIC_BLOCK_SHIFT;  // 默认块大小 1 << 14 = 16384
 
   static final int BINARY_BLOCK_SHIFT = 5;
   static final int BINARY_DOCS_PER_COMPRESSED_BLOCK = 1 << BINARY_BLOCK_SHIFT;
