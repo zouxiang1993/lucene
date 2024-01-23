@@ -515,7 +515,7 @@ public final class CompressingStoredFieldsReader extends StoredFieldsReader {
 
       if (merging) {
         final int totalLength = Math.toIntExact(offsets[chunkDocs]);
-        // decompress eagerly
+        // decompress eagerly  merging时针对顺序访问做优化，假设每个文档都马上会被访问，所以这里提前解压所有的数据。 merging==false会针对随机访问做优化，假设只访问单个文档，因此只解压部分数据。
         if (sliced) {
           bytes.offset = bytes.length = 0;
           for (int decompressed = 0; decompressed < totalLength; ) {
@@ -718,6 +718,10 @@ public final class CompressingStoredFieldsReader extends StoredFieldsReader {
   @Override
   public long ramBytesUsed() {
     return indexReader.ramBytesUsed();
+    // TODO: 这里的内存统计不准确，还要加上BlockState使用的内存，尤其是 BlockState中的 spare 和 butes，
+    //  之前遇到ES OOM的问题，这块占了很大一部分内存。这个spare的使用跟大doc相关，
+    //  本来想提个Lucene的PR，但Lucene最新的代码已经将CodecReader中这个内存统计的功能移除了。
+    //  https://issues.apache.org/jira/browse/LUCENE-9387
   }
   
   @Override
