@@ -223,7 +223,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
       meta.writeShort(jumpTableEntryCount);
       meta.writeByte(IndexedDISI.DEFAULT_DENSE_RANK_POWER);
     }
-
+// TODO: 这部分是否也可以应用ZSTD?
     meta.writeLong(numValues);
     final int numBitsPerValue;
     boolean doBlocks = false;
@@ -235,7 +235,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
       if (uniqueValues != null
           && uniqueValues.size() > 1
           && DirectWriter.unsignedBitsRequired(uniqueValues.size() - 1) < DirectWriter.unsignedBitsRequired((max - min) / gcd)) {
-        numBitsPerValue = DirectWriter.unsignedBitsRequired(uniqueValues.size() - 1); // TODO: 这里应该在上面缓存numBitsPerValue的结果，减少一次调用
+        numBitsPerValue = DirectWriter.unsignedBitsRequired(uniqueValues.size() - 1);
         final Long[] sortedUniqueValues = uniqueValues.toArray(new Long[0]);
         Arrays.sort(sortedUniqueValues);
         meta.writeInt(sortedUniqueValues.length); // tablesize
@@ -273,7 +273,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
     long startOffset = data.getFilePointer();
     meta.writeLong(startOffset); // valueOffset
     long jumpTableOffset = -1;
-    if (doBlocks) {
+    if (doBlocks) { // TODO: 这里写入的数据，是否可以再引入一层通用压缩？比如Lz4 或者 ZSTD ?
       jumpTableOffset = writeValuesMultipleBlocks(valuesProducer.getSortedNumeric(field), gcd);
     } else if (numBitsPerValue != 0) {
       writeValuesSingleBlock(valuesProducer.getSortedNumeric(field), numValues, numBitsPerValue, min, gcd, encode);

@@ -169,7 +169,7 @@ public final class Lucene80DocValuesFormat extends DocValuesFormat {
   static final int BINARY_BLOCK_SHIFT = 5;
   static final int BINARY_DOCS_PER_COMPRESSED_BLOCK = 1 << BINARY_BLOCK_SHIFT;
   
-  static final int TERMS_DICT_BLOCK_SHIFT = 4;
+  static final int TERMS_DICT_BLOCK_SHIFT = 4;  // TODO: 在Lucene 8.9中，这里的TermDict已经引入了Lz4压缩，block大小也有变化，应该会对压缩率有较大提升？
   static final int TERMS_DICT_BLOCK_SIZE = 1 << TERMS_DICT_BLOCK_SHIFT;
   static final int TERMS_DICT_BLOCK_MASK = TERMS_DICT_BLOCK_SIZE - 1;
 
