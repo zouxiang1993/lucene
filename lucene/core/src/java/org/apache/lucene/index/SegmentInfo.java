@@ -55,7 +55,7 @@ public final class SegmentInfo {
   /** Unique segment name in the directory. */
   public final String name;
 
-  private int maxDoc;         // number of docs in seg
+  private int maxDoc;         // number of docs in seg。 已经被删除的doc也还是会被计数。
 
   /** Where this segment resides. */
   public final Directory dir;

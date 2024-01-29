@@ -255,7 +255,7 @@ public abstract class DirectoryReader extends BaseCompositeReader<LeafReader> {
    *  
    *  @return a sorted list of {@link IndexCommit}s, from oldest 
    *  to latest. */
-  public static List<IndexCommit> listCommits(Directory dir) throws IOException {
+  public static List<IndexCommit> listCommits(Directory dir) throws IOException { // 每个 segment_N 文件都表示一个 IndexCommit
     final String[] files = dir.listAll();
 
     List<IndexCommit> commits = new ArrayList<>();

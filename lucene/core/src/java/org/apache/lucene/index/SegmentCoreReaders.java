@@ -75,7 +75,7 @@ SegmentCoreReaders中包含了所有不可变的对象: FieldsProducer StoredFie
   // TODO: make a single thread local w/ a
   // Thingy class holding fieldsReader, termVectorsReader,
   // normsProducer
-// TODO: 为什么fieldsReader就需要ThreadLocal呢？
+// TODO: 为什么fieldsReader就需要ThreadLocal呢？可能是为了提升查询性能？同一个线程内访问多个doc，先按doc id排序，再逐个查询？
   final CloseableThreadLocal<StoredFieldsReader> fieldsReaderLocal = new CloseableThreadLocal<StoredFieldsReader>() {
     @Override
     protected StoredFieldsReader initialValue() {

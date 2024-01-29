@@ -79,7 +79,7 @@ import org.apache.lucene.util.Bits;  // javadocs
 public abstract class IndexReader implements Closeable {
   
   private boolean closed = false;
-  private boolean closedByChild = false;
+  private boolean closedByChild = false; // 当一个IndexReader被close时，它所有的parent路径上的Reader都会被close
   private final AtomicInteger refCount = new AtomicInteger(1);
 
   IndexReader() {

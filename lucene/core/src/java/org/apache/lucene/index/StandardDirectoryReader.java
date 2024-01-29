@@ -38,7 +38,7 @@ import org.apache.lucene.util.IOUtils;
 /** Default implementation of {@link DirectoryReader}. */
 public final class StandardDirectoryReader extends DirectoryReader {
 
-  final IndexWriter writer;
+  final IndexWriter writer;  // writer不为null时表示NRT
   final SegmentInfos segmentInfos;
   private final boolean applyAllDeletes;
   private final boolean writeAllDeletes;

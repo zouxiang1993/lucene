@@ -1,0 +1,97 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+abstract class IndexReader {
+  ---
+  + abstract void document(int docID, StoredFieldVisitor visitor)
+  + abstract Fields getTermVectors(int docID)
+}
+
+abstract class LeafReader {
+  ---
+  + abstract Terms terms(String field)
+  + abstract XxxDocValues getXxxDocValues(String field)
+  + abstract NumericDocValues getNormValues(String field)
+  + abstract PointValues getPointValues(String field)
+}
+
+abstract class CompositeReader {
+  CompositeReader只从IndexReader继承了 document 和 getTermVectors
+  这两个接口，都是根据docID来查询的。 CompositeReader不支持其他形式的查询，
+  例如 terms(String field)。
+  ---
+  # abstract List<? extends IndexReader> getSequentialSubReaders()
+}
+
+abstract class CodecReader {
+  暴露Codec的各种读API，并通过这些API来实现LeafReader的基础查询功能
+  ---
+  + abstract StoredFieldsReader getFieldsReader()
+  + abstract TermVectorsReader getTermVectorsReader()
+  + abstract NormsProducer getNormsReader()
+  + abstract DocValuesProducer getDocValuesReader()
+  + abstract FieldsProducer getPostingsReader()
+  + abstract PointsReader getPointsReader()
+}
+
+class SegmentReader {
+  表示对一个segment的IndexReader。多个SegmentReader指向
+  同一个segment时可以共享同一份核心数据结构 (SegmentCoreReaders)
+  ，但是会有不同delete, docvalues等
+  ---
+  // 不可变部分
+  SegmentCoreReaders core;
+  // 可变部分  field info, deletes, docvalues
+  FieldInfos fieldInfos;
+  - Bits liveDocs;
+  - Bits hardLiveDocs;
+  SegmentDocValues segDocValues;
+  DocValuesProducer docValuesProducer;
+}
+
+class SegmentCoreReaders {
+  指向同一个segment的多个SegmentReader
+  可以共享同一个SegmentCoreReaders，
+  其中包含了所有不可变的部分
+  ---
+  String segment;
+  FieldInfos coreFieldInfos;
+  FieldsProducer fields;
+  NormsProducer normsProducer;
+  PointsReader pointsReader;
+  CompoundDirectory cfsReader;
+  // store fields和term vectors的Reader在这里是ThreadLocal的
+  // 可能是为了提升查询性能(顺序访问多个doc)？
+  StoredFieldsReader fieldsReaderOrig;
+  TermVectorsReader termVectorsReaderOrig;
+}
+
+abstract class BaseCompositeReader<R extends IndexReader> {
+  ---
+  - R[] subReaders // 所有的子Reader
+  - int[] starts   // 每个子Reader第一个doc的doc number
+}
+
+abstract class DirectoryReader {
+  对一个Directory的Reader
+  ---
+  + static DirectoryReader open(...)
+  + static DirectoryReader openIfChanged(...)
+  // 每一个segment_N文件都表示一个IndexCommit
+  + static List<IndexCommit> listCommits(Directory dir)
+}
+
+class StandardDirectoryReader
+
+IndexReader <|-- LeafReader
+IndexReader <|-- CompositeReader
+
+LeafReader <|-- CodecReader
+CodecReader <|-- SegmentReader
+
+CompositeReader <|-- BaseCompositeReader
+BaseCompositeReader <|-- DirectoryReader
+DirectoryReader <|-- StandardDirectoryReader
+
+SegmentReader -down-- SegmentCoreReaders
+@enduml
