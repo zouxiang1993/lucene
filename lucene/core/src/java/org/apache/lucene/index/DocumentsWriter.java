@@ -406,7 +406,7 @@ final class DocumentsWriter implements Closeable, Accountable {
                        final DocumentsWriterDeleteQueue.Node<?> delNode) throws IOException {
     boolean hasEvents = preUpdate(); // 处理文档前的操作，主要是 flush & stall 相关
 
-    final DocumentsWriterPerThread dwpt = flushControl.obtainAndLock();
+    final DocumentsWriterPerThread dwpt = flushControl.obtainAndLock(); // 从DWPTPool中获取DWPT
     final DocumentsWriterPerThread flushingDWPT;
     long seqNo;
 

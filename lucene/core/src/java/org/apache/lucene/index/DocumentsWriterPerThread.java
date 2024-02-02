@@ -208,7 +208,7 @@ final class DocumentsWriterPerThread implements Accountable {
           consumer.processDocument(numDocsInRAM++, doc);  // numDocsInRAM++ 生成新的doc id
         }
         allDocsIndexed = true;
-        return finishDocuments(deleteNode, docsInRamBefore);
+        return finishDocuments(deleteNode, docsInRamBefore); // 在finishDocuments中处理delete，并且生成递增的seqNo
       } finally {
         if (!allDocsIndexed && !aborted) {
           // the iterator threw an exception that is not aborting

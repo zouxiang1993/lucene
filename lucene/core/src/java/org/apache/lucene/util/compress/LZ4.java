@@ -58,7 +58,7 @@ public final class LZ4 {
   static final int HASH_TABLE_SIZE_HC = 1 << HASH_LOG_HC;
 
 
-  private static int hash(int i, int hashBits) {
+  private static int hash(int i, int hashBits) {  // 保留hash值的前hashBits位
     return (i * -1640531535) >>> (32 - hashBits);
   }
 
@@ -138,7 +138,7 @@ public final class LZ4 {
 
     return dOff;
   }
-
+// 为什么Length都编码为多个 byte的数值之和，而不是编码为可变int ？可能是认为这个场景下， literal length 和 match length 普遍偏小？
   private static void encodeLen(int l, DataOutput out) throws IOException {
     while (l >= 0xFF) {
       out.writeByte((byte) 0xFF);
@@ -146,7 +146,7 @@ public final class LZ4 {
     }
     out.writeByte((byte) l);
   }
-
+// Literal: 字面量。指未经压缩，直接将原文写入到DataOutpuf中。
   private static void encodeLiterals(byte[] bytes, int token, int anchor, int literalLen, DataOutput out) throws IOException {
     out.writeByte((byte) token);
 
@@ -167,14 +167,14 @@ public final class LZ4 {
   private static void encodeSequence(byte[] bytes, int anchor, int matchRef, int matchOff, int matchLen, DataOutput out) throws IOException {
     final int literalLen = matchOff - anchor;
     assert matchLen >= 4;
-    // encode token
+    // encode token   前4bit表示长度(如果长度>=15，那么拆分到token后面的bytes中表示); 后面4个bit表示 matchLen - 4 (如果matchLen太长，也需要拆分)
     final int token = (Math.min(literalLen, 0x0F) << 4) | Math.min(matchLen - 4, 0x0F);
     encodeLiterals(bytes, token, anchor, literalLen, out);
 
     // encode match dec
     final int matchDec = matchOff - matchRef;
     assert matchDec > 0 && matchDec < 1 << 16;
-    out.writeByte((byte) matchDec);
+    out.writeByte((byte) matchDec);  // 将matchDec编码为2个byte
     out.writeByte((byte) (matchDec >>> 8));
 
     // encode match len
@@ -448,7 +448,7 @@ public final class LZ4 {
 
       main:
       while (off <= limit) {
-        // find a match
+        // find a match    寻找 4 bytes的匹配位置，即 bytes[off:off+4] == bytes[ref:ref+4]
         int ref;
         while (true) {
           if (off >= matchLimit) {

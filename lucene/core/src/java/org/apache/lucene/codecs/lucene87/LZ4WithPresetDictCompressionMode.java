@@ -161,13 +161,13 @@ public final class LZ4WithPresetDictCompressionMode extends CompressionMode {
       long prevCompressedSize = compressed.size();
       LZ4.compressWithDictionary(bytes, 0, dictLen, len, compressed, hashTable);
       // Write the number of compressed bytes
-      out.writeVInt(Math.toIntExact(compressed.size() - prevCompressedSize));
+      out.writeVInt(Math.toIntExact(compressed.size() - prevCompressedSize));  // 记录压缩之后的offset
     }
 
     @Override
     public void compress(byte[] bytes, int off, int len, DataOutput out) throws IOException {
-      final int dictLength = len / (NUM_SUB_BLOCKS * DICT_SIZE_FACTOR);
-      final int blockLength = (len - dictLength + NUM_SUB_BLOCKS - 1) / NUM_SUB_BLOCKS;
+      final int dictLength = len / (NUM_SUB_BLOCKS * DICT_SIZE_FACTOR);  // 字典长度
+      final int blockLength = (len - dictLength + NUM_SUB_BLOCKS - 1) / NUM_SUB_BLOCKS;  // 根据blockLength可以得出每个block在压缩之前的数据的offset
       buffer = ArrayUtil.grow(buffer, dictLength + blockLength);
       out.writeVInt(dictLength);
       out.writeVInt(blockLength);

@@ -172,7 +172,7 @@ final class DocumentsWriterFlushControl implements Accountable, Closeable {
 
   synchronized DocumentsWriterPerThread doAfterDocument(DocumentsWriterPerThread perThread, boolean isUpdate) {
     try {
-      commitPerThreadBytes(perThread);
+      commitPerThreadBytes(perThread);  // 统计 flushBytes & activeBytes
       if (!perThread.isFlushPending()) {
         if (isUpdate) {
           flushPolicy.onUpdate(this, perThread);

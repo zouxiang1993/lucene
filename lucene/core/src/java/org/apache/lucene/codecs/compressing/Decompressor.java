@@ -31,6 +31,11 @@ public abstract class Decompressor implements Cloneable {
   protected Decompressor() {}
 
   /**
+   * 假设压缩前的数据为 originalStream，originalLength表示 originalStream的长度。
+   * decompress方法 从 in 中解压数据并输出到bytes中，
+   * 注意: 调用者最终需要的仅是压缩前的一部分数据，即 originalStream[offset:offset+length]，
+   * 不同的压缩算法实现可以根据这一特点来优化: 有的压缩算法可能只需要解压一部分数据，有的压缩算法可能需要解压所有的数据复原originalStream，然后再截取一部分。
+   * 解压完后，bytes.length == length
    * Decompress bytes that were stored between offsets <code>offset</code> and
    * <code>offset+length</code> in the original stream from the compressed
    * stream <code>in</code> to <code>bytes</code>. After returning, the length

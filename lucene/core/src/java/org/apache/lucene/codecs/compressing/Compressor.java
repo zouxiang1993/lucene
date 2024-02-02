@@ -31,6 +31,7 @@ public abstract class Compressor implements Closeable {
   protected Compressor() {}
 
   /**
+   * 将 bytes[off:off+len] 压缩并输出到 out 中
    * Compress bytes into <code>out</code>. It is the responsibility of the
    * compressor to add all necessary information so that a {@link Decompressor}
    * will know when to stop decompressing bytes from the stream.
