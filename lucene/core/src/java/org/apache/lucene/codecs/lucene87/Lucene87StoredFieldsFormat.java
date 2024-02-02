@@ -133,7 +133,7 @@ public class Lucene87StoredFieldsFormat extends StoredFieldsFormat {
 
   @Override
   public StoredFieldsWriter fieldsWriter(Directory directory, SegmentInfo si, IOContext context) throws IOException {
-    String previous = si.putAttribute(MODE_KEY, mode.name());
+    String previous = si.putAttribute(MODE_KEY, mode.name()); // 会在SegmentInfo中存储压缩模式。使得在读取segment时能够复原。
     if (previous != null && previous.equals(mode.name()) == false) {
       throw new IllegalStateException("found existing value for " + MODE_KEY + " for segment: " + si.name +
                                       "old=" + previous + ", new=" + mode.name());
@@ -152,7 +152,7 @@ public class Lucene87StoredFieldsFormat extends StoredFieldsFormat {
   }
 
   // Shoot for 10 sub blocks of 48kB each.
-  private static final int BEST_COMPRESSION_BLOCK_LENGTH = 10 * 48 * 1024;
+  private static final int BEST_COMPRESSION_BLOCK_LENGTH = 10 * 48 * 1024;    // TODO: 感觉 best_compression的chunk size有点小了？调大点能否提升压缩率？
 
   /** Compression mode for {@link Mode#BEST_COMPRESSION} */
   public static final CompressionMode BEST_COMPRESSION_MODE = new DeflateWithPresetDictCompressionMode();

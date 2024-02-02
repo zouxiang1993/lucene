@@ -88,7 +88,7 @@ public final class CompressingStoredFieldsReader extends StoredFieldsReader {
   private final CompressionMode compressionMode;
   private final Decompressor decompressor;
   private final int numDocs;
-  private final boolean merging; // TODO: 下次看堆dump分析时，注意看下这个merging区分的两类CompressingStoredFieldsReader占比？
+  private final boolean merging; // merging==false时，针对随机读优化；merging==true时，针对顺序读优化。TODO: 下次看堆dump分析时，注意看下这个merging区分的两类CompressingStoredFieldsReader占比？
   private final BlockState state;
   private final long numDirtyChunks; // number of incomplete compressed blocks written
   private final long numDirtyDocs; // cumulative number of missing docs in incomplete chunks
@@ -406,11 +406,11 @@ public final class CompressingStoredFieldsReader extends StoredFieldsReader {
     // the start pointer at which you can read the compressed documents
     private long startPointer;
 
-    private final BytesRef spare; // 这里的spare和bytes只有在merging的时候才会用到。
+    private final BytesRef spare;
     private final BytesRef bytes;
 
     BlockState() {
-      if (merging) {
+      if (merging) { // mergins == true时，会产生 spare & bytes 这两块额外的内存开销。
         spare = new BytesRef();
         bytes = new BytesRef();
       } else {

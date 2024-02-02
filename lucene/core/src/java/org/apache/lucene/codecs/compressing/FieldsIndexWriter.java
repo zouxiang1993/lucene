@@ -73,7 +73,7 @@ public final class FieldsIndexWriter implements Closeable {
     this.id = id;
     this.blockShift = blockShift;
     this.ioContext = ioContext;
-    this.docsOut = dir.createTempOutput(name, codecName + "-doc_ids", ioContext);
+    this.docsOut = dir.createTempOutput(name, codecName + "-doc_ids", ioContext); // 写入过程中的临时文件
     boolean success = false;
     try {
       CodecUtil.writeHeader(docsOut, codecName + "Docs", VERSION_CURRENT);
@@ -110,6 +110,7 @@ public final class FieldsIndexWriter implements Closeable {
       metaOut.writeInt(numDocs);  // 注意这里写的是 .fdm，不是 .fdx
       metaOut.writeInt(blockShift);
       metaOut.writeInt(totalChunks + 1);
+// 将 每个chunk的第一个id doc-ids 写入 .fdm & .fdx
       metaOut.writeLong(dataOut.getFilePointer());
 
       try (ChecksumIndexInput docsIn = dir.openChecksumInput(docsOut.getName(), IOContext.READONCE)) {
@@ -135,7 +136,7 @@ public final class FieldsIndexWriter implements Closeable {
       }
       dir.deleteFile(docsOut.getName());
       docsOut = null;
-
+// 将 每个chunk 的偏移量offset写入 .fdm & .fdx
       metaOut.writeLong(dataOut.getFilePointer());
       try (ChecksumIndexInput filePointersIn = dir.openChecksumInput(filePointersOut.getName(), IOContext.READONCE)) {
         CodecUtil.checkHeader(filePointersIn, codecName + "FilePointers", VERSION_CURRENT, VERSION_CURRENT);

@@ -148,7 +148,7 @@ public final class CompressingStoredFieldsWriter extends StoredFieldsWriter {
     }
   }
 
-  private int numStoredFieldsInDoc;
+  private int numStoredFieldsInDoc; // 记录当前正在处理的文档中有多少个字段
 
   @Override
   public void startDocument() throws IOException {
@@ -163,7 +163,7 @@ public final class CompressingStoredFieldsWriter extends StoredFieldsWriter {
     }
     this.numStoredFields[numBufferedDocs] = numStoredFieldsInDoc;
     numStoredFieldsInDoc = 0; // 这里为什么用numStoredFieldsInDoc来记录文档中的字段数，而不是直接在numStoredFields[numBufferedDocs]中累加呢？是因为这样访存速度会更快吗？
-    endOffsets[numBufferedDocs] = Math.toIntExact(bufferedDocs.size());
+    endOffsets[numBufferedDocs] = Math.toIntExact(bufferedDocs.size()); // 记录每个doc在chunk内的结束位置
     ++numBufferedDocs;
     if (triggerFlush()) {
       flush();
