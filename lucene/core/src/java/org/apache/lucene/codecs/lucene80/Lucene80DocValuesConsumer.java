@@ -203,7 +203,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
     long min = minMax.min;
     final long max = minMax.max;
     assert blockMinMax.spaceInBits <= minMax.spaceInBits;
-// docsWithField: 可能不是所有文档都有这个字段值，这种情况下，要记录哪些doc id有值。
+// 1. docsWithField: 可能不是所有文档都有这个字段值，这种情况下，要记录哪些doc id有值。
     if (numDocsWithValue == 0) {              // meta[-2, 0]: No documents with values 所有文档都没有值，可以特殊优化
       meta.writeLong(-2); // docsWithFieldOffset
       meta.writeLong(0L); // docsWithFieldLength
@@ -219,11 +219,11 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
       meta.writeLong(offset);// docsWithFieldOffset
       values = valuesProducer.getSortedNumeric(field);
       final short jumpTableEntryCount = IndexedDISI.writeBitSet(values, data, IndexedDISI.DEFAULT_DENSE_RANK_POWER); // 在.dvd中写入所有有值的doc id
-      meta.writeLong(data.getFilePointer() - offset); // docsWithFieldLength
+      meta.writeLong(data.getFilePointer() - offset); // docsWithFieldLength    TODO: 读meta的这个字段，可以统计 docsWithField 的占比
       meta.writeShort(jumpTableEntryCount);
       meta.writeByte(IndexedDISI.DEFAULT_DENSE_RANK_POWER);
     }
-// TODO: 这部分是否也可以应用ZSTD?
+// 2. field values  TODO: 这部分是否也可以应用ZSTD?
     meta.writeLong(numValues);
     final int numBitsPerValue;
     boolean doBlocks = false;
@@ -252,7 +252,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
         uniqueValues = null;
         // we do blocks if that appears to save 10+% storage
         // doBlocks为true时表示分多个block，为false时表示只有1个block。主要是为了节省存储空间，比如有时候一个block内的所有value都相同。
-        doBlocks = minMax.spaceInBits > 0 && (double) blockMinMax.spaceInBits / minMax.spaceInBits <= 0.9;
+        doBlocks = minMax.spaceInBits > 0 && (double) blockMinMax.spaceInBits / minMax.spaceInBits <= 0.9; // TODO: 是不是考虑 always block ?
         if (doBlocks) {
           numBitsPerValue = 0xFF;
           meta.writeInt(-2 - NUMERIC_BLOCK_SHIFT); // tablesize
@@ -267,7 +267,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
       }
     }
 
-    meta.writeByte((byte) numBitsPerValue);
+    meta.writeByte((byte) numBitsPerValue);  // 如果这里 numBitesPerValue == 0xFF，表示分多个blocks，否则表示 单block
     meta.writeLong(min);
     meta.writeLong(gcd);
     long startOffset = data.getFilePointer();
@@ -346,7 +346,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
       data.writeByte((byte) 0);
       data.writeLong(min);
     } else {
-      final int bitsPerValue = DirectWriter.unsignedBitsRequired(max - min);
+      final int bitsPerValue = DirectWriter.unsignedBitsRequired(max - min);   // TODO: 这里应该可以用 (max -min) / gcd
       buffer.reset();
       assert buffer.size() == 0;
       final DirectWriter w = DirectWriter.getInstance(buffer, length, bitsPerValue);
@@ -357,6 +357,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
       data.writeByte((byte) bitsPerValue);
       data.writeLong(min);
       data.writeInt(Math.toIntExact(buffer.size()));
+      // TODO: 这里先把buffer压缩一下？把block size也调大一点？
       buffer.copyTo(data);
     }
   }
@@ -561,7 +562,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
     for (int doc = values.nextDoc(); doc != DocIdSetIterator.NO_MORE_DOCS; doc = values.nextDoc()) {
       numDocsWithField++;
     }
-
+// 1. docsWithField
     if (numDocsWithField == 0) {
       meta.writeLong(-2); // docsWithFieldOffset
       meta.writeLong(0L); // docsWithFieldLength
@@ -581,13 +582,13 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
       meta.writeShort(jumpTableentryCount);
       meta.writeByte(IndexedDISI.DEFAULT_DENSE_RANK_POWER);
     }
-
+// 2. Ords
     meta.writeInt(numDocsWithField);
     if (values.getValueCount() <= 1) {
       meta.writeByte((byte) 0); // bitsPerValue
       meta.writeLong(0L); // ordsOffset
       meta.writeLong(0L); // ordsLength
-    } else {
+    } else {  // TODO: 这里的 numberOfBitsPerOrd算出来偏大，每个ord value占了1byte。改用其他实现？
       int numberOfBitsPerOrd = DirectWriter.unsignedBitsRequired(values.getValueCount() - 1); // Ords部分每个文档占据相同的bits
       meta.writeByte((byte) numberOfBitsPerOrd); // bitsPerValue
       long start = data.getFilePointer();
@@ -621,15 +622,15 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
     int maxLength = 0;
     TermsEnum iterator = values.termsEnum();
     for (BytesRef term = iterator.next(); term != null; term = iterator.next()) {
-      if ((ord & Lucene80DocValuesFormat.TERMS_DICT_BLOCK_MASK) == 0) {
+      if ((ord & Lucene80DocValuesFormat.TERMS_DICT_BLOCK_MASK) == 0) { // 每个block存16个term
         writer.add(data.getFilePointer() - start);
-        data.writeVInt(term.length);
+        data.writeVInt(term.length); // 每个block中第1个term
         data.writeBytes(term.bytes, term.offset, term.length);
       } else {
         final int prefixLength = StringHelper.bytesDifference(previous.get(), term);
         final int suffixLength = term.length - prefixLength;
         assert suffixLength > 0; // terms are unique
-
+        // 其他term采用前缀压缩存储
         data.writeByte((byte) (Math.min(prefixLength, 15) | (Math.min(15, suffixLength - 1) << 4)));
         if (prefixLength >= 15) {
           data.writeVInt(prefixLength - 15);

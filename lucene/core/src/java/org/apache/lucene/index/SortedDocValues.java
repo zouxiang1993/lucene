@@ -46,7 +46,7 @@ public abstract class SortedDocValues extends BinaryDocValues {
    * @return ordinal for the document: this is dense, starts at 0, then
    *         increments by 1 for the next value in sorted order.
    */
-  public abstract int ordValue() throws IOException;
+  public abstract int ordValue() throws IOException;  // 返回当前文档的SortedDocValues值对应的序号值ord。
 
   /** Retrieves the value for the specified ordinal. The returned
    * {@link BytesRef} may be re-used across calls to {@link #lookupOrd(int)}
@@ -55,7 +55,7 @@ public abstract class SortedDocValues extends BinaryDocValues {
    * @param ord ordinal to lookup (must be &gt;= 0 and &lt; {@link #getValueCount()})
    * @see #ordValue() 
    */
-  public abstract BytesRef lookupOrd(int ord) throws IOException;
+  public abstract BytesRef lookupOrd(int ord) throws IOException;  // 根据序号值ord查询对应的string值
 
   private final BytesRef empty = new BytesRef();
 

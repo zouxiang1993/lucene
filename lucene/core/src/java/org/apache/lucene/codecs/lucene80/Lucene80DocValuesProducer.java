@@ -289,7 +289,7 @@ final class Lucene80DocValuesProducer extends DocValuesProducer implements Close
   private static class NumericEntry {
     long[] table;
     int blockShift;
-    byte bitsPerValue;
+    byte bitsPerValue;  // bitePerValue == -1时，表示分多个block；否则表示单个block
     long docsWithFieldOffset;
     long docsWithFieldLength;
     short jumpTableEntryCount;

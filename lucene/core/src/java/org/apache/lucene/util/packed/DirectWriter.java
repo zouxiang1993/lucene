@@ -23,7 +23,10 @@ import java.util.Arrays;
 
 import org.apache.lucene.store.DataOutput;
 
-/** 
+/**
+ * DirectReader & DirectWriter : Direct表示读取时不会全部从磁盘加载进内存，而是按需从磁盘读取。
+ * TODO: 为什么只实现 1, 2, 4, 8, 12, 16, 20, 24, 28, 32, 40, 48, 56, 64 这些bit？实现所有是否能减少磁盘存储空间？
+ *
  * Class for writing packed integers to be directly read from Directory.
  * Integers can be read on-the-fly via {@link DirectReader}.
  * <p>
