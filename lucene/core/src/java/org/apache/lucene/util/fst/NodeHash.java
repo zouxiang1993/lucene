@@ -21,7 +21,8 @@ import java.io.IOException;
 
 import org.apache.lucene.util.packed.PackedInts;
 import org.apache.lucene.util.packed.PagedGrowableWriter;
-
+// 每当向FST中新增一个node时，先通过NodeHash查找FST中是否已经存在完全相同的node。如果存在，就直接引用之前的。
+// TODO: 通过这种方式来节省存储空间？是否会有很明显的收益？如果这块CPU消耗比较多的话，也可以考虑关闭这个功能？
 // Used to dedup states (lookup already-frozen states)
 final class NodeHash<T> {
 

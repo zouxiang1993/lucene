@@ -171,8 +171,8 @@ public class Builder<T> {
    *
    * @param allowFixedLengthArcs Pass false to disable the fixed length arc optimization (binary search or
    *    direct addressing) while building the FST; this will make the resulting FST smaller but slower to
-   *    traverse.
-   *
+   *    traverse.  FST中，一个Node有多条Arc时，每条边是否按固定长度存储。如果是，则会占用更多的存储空间，但是查询的速度会更快（可以二分）。
+   *                TODO：可以考虑关闭这个功能来节省存储空间？或者调大阈值？
    * @param bytesPageBits How many bits wide to make each
    *    byte[] block in the BytesStore; if you know the FST
    *    will be large then make this larger.  For example 15
@@ -181,7 +181,7 @@ public class Builder<T> {
   public Builder(FST.INPUT_TYPE inputType, int minSuffixCount1, int minSuffixCount2, boolean doShareSuffix,
                  boolean doShareNonSingletonNodes, int shareMaxTailLength, Outputs<T> outputs,
                  boolean allowFixedLengthArcs, int bytesPageBits) {
-    this.minSuffixCount1 = minSuffixCount1;
+    this.minSuffixCount1 = minSuffixCount1; // 在目前看到的所有用法中， minSuffixCount1 和 minSuffixCount2 都为0。因此这里先忽略这两个参数的用途
     this.minSuffixCount2 = minSuffixCount2;
     this.doShareNonSingletonNodes = doShareNonSingletonNodes;
     this.shareMaxTailLength = shareMaxTailLength;
@@ -440,7 +440,7 @@ public class Builder<T> {
     }
     final int prefixLenPlus1 = pos1+1;
       
-    if (frontier.length < input.length+1) {
+    if (frontier.length < input.length+1) { // frontier动态扩容
       final UnCompiledNode<T>[] next = ArrayUtil.grow(frontier, input.length+1);
       for(int idx=frontier.length;idx<next.length;idx++) {
         next[idx] = new UnCompiledNode<>(this, idx);
@@ -467,7 +467,7 @@ public class Builder<T> {
 
     // push conflicting outputs forward, only as far as
     // needed
-    for(int idx=1;idx<prefixLenPlus1;idx++) {
+    for(int idx=1;idx<prefixLenPlus1;idx++) { // 修正output的冲突
       final UnCompiledNode<T> node = frontier[idx];
       final UnCompiledNode<T> parentNode = frontier[idx-1];
 

@@ -37,8 +37,9 @@ import org.apache.lucene.util.RamUsageEstimator;
 import org.apache.lucene.util.UnicodeUtil;
 
 /*
-把数据输出到多个 ByteBuffer中。是在堆内分配内存，动态扩展
-TODO: 有需要再看具体实现  & ByteBufferRecycler 是如何回收的？
+把数据输出到多个 ByteBuffer中。是在堆内分配内存，动态扩展。
+当block数量超过100后，block会膨胀-->即block size会翻倍，所有数据重写一遍。这个代价还是挺大的，应该尽量避免。
+newResettableInstance 方法构造一个支持reset的示例，reset是通过 ByteBufferRecycler 来复用block减少内存分配的。
  */
 /**
  * A {@link DataOutput} storing data in a list of {@link ByteBuffer}s.

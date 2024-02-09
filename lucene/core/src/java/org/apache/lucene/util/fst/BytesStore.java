@@ -26,6 +26,9 @@ import org.apache.lucene.store.DataOutput;
 import org.apache.lucene.util.Accountable;
 import org.apache.lucene.util.RamUsageEstimator;
 
+// NOTE: 纯内存，按block划分，block size固定(最后一个可能比较小，见finish())，block数量可动态扩展。
+// 支持带position的写入。
+
 // TODO: merge with PagedBytes, except PagedBytes doesn't
 // let you read while writing which FST needs
 
@@ -34,7 +37,7 @@ class BytesStore extends DataOutput implements Accountable {
   private static final long BASE_RAM_BYTES_USED =
         RamUsageEstimator.shallowSizeOfInstance(BytesStore.class)
       + RamUsageEstimator.shallowSizeOfInstance(ArrayList.class);
-
+// 将数据存放到多个block中，block size = 2^n，block数量可动态扩展
   private final List<byte[]> blocks = new ArrayList<>();
 
   private final int blockSize;
