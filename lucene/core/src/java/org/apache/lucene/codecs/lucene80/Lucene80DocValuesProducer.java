@@ -299,7 +299,7 @@ final class Lucene80DocValuesProducer extends DocValuesProducer implements Close
     long gcd;
     long valuesOffset;
     long valuesLength;
-    long valueJumpTableOffset; // -1 if no jump-table
+    long valueJumpTableOffset; // -1 if no jump-table    // valuesOffset + valuesLength - valueJumpTableOffset = jump table的长度。
   }
 
   private static class BinaryEntry {
@@ -460,7 +460,7 @@ final class Lucene80DocValuesProducer extends DocValuesProducer implements Close
       // empty
       return DocValues.emptyNumeric();
     } else if (entry.docsWithFieldOffset == -1) {
-      // dense
+      // dense  稠密的: 每个文档都有值
       if (entry.bitsPerValue == 0) {
         return new DenseNumericDocValues(maxDoc) {
           @Override
@@ -481,7 +481,7 @@ final class Lucene80DocValuesProducer extends DocValuesProducer implements Close
             }
           };
         } else {
-          final LongValues values = DirectReader.getInstance(slice, entry.bitsPerValue);
+          final LongValues values = DirectReader.getInstance(slice, entry.bitsPerValue); // DirectReader: 读取时按需读取，不会全部加载进内存
           if (entry.table != null) {
             final long[] table = entry.table;
             return new DenseNumericDocValues(maxDoc) {
@@ -503,7 +503,7 @@ final class Lucene80DocValuesProducer extends DocValuesProducer implements Close
         }
       }
     } else {
-      // sparse
+      // sparse 稀疏的: 部分文档有值，部分文档没有值、
       final IndexedDISI disi = new IndexedDISI(data, entry.docsWithFieldOffset, entry.docsWithFieldLength,
           entry.jumpTableEntryCount, entry.denseRankPower, entry.numValues);
       if (entry.bitsPerValue == 0) {

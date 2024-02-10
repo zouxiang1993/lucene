@@ -164,7 +164,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
     MinMaxTracker minMax = new MinMaxTracker();
     MinMaxTracker blockMinMax = new MinMaxTracker();
     long gcd = 0; // 所有value的最大公约数
-    Set<Long> uniqueValues = new HashSet<>(); // 用于统计unique value总数 < 256时的所有唯一值
+    Set<Long> uniqueValues = new HashSet<>(); // 用于统计unique value总数 <= 256时的所有唯一值
     for (int doc = values.nextDoc(); doc != DocIdSetIterator.NO_MORE_DOCS; doc = values.nextDoc()) {
       for (int i = 0, count = values.docValueCount(); i < count; ++i) {
         long v = values.nextValue();
@@ -588,7 +588,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
       meta.writeByte((byte) 0); // bitsPerValue
       meta.writeLong(0L); // ordsOffset
       meta.writeLong(0L); // ordsLength
-    } else {  // TODO: 这里的 numberOfBitsPerOrd算出来偏大，每个ord value占了1byte。改用其他实现？
+    } else {  // TODO: 这里的 numberOfBitsPerOrd算出来偏大。改用PackedInts#getWriter & getDirectReader?
       int numberOfBitsPerOrd = DirectWriter.unsignedBitsRequired(values.getValueCount() - 1); // Ords部分每个文档占据相同的bits
       meta.writeByte((byte) numberOfBitsPerOrd); // bitsPerValue
       long start = data.getFilePointer();
@@ -614,6 +614,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
     ByteBuffersIndexOutput addressOutput = new ByteBuffersIndexOutput(addressBuffer, "temp", "temp");
     meta.writeInt(DIRECT_MONOTONIC_BLOCK_SHIFT);
     long numBlocks = (size + Lucene80DocValuesFormat.TERMS_DICT_BLOCK_MASK) >>> Lucene80DocValuesFormat.TERMS_DICT_BLOCK_SHIFT;
+// writer中记录每个block的起始地址
     DirectMonotonicWriter writer = DirectMonotonicWriter.getInstance(meta, addressOutput, numBlocks, DIRECT_MONOTONIC_BLOCK_SHIFT);
 
     BytesRefBuilder previous = new BytesRefBuilder();
@@ -624,7 +625,7 @@ final class Lucene80DocValuesConsumer extends DocValuesConsumer implements Close
     for (BytesRef term = iterator.next(); term != null; term = iterator.next()) {
       if ((ord & Lucene80DocValuesFormat.TERMS_DICT_BLOCK_MASK) == 0) { // 每个block存16个term
         writer.add(data.getFilePointer() - start);
-        data.writeVInt(term.length); // 每个block中第1个term
+        data.writeVInt(term.length); // 每个block中第1个term，原文存储
         data.writeBytes(term.bytes, term.offset, term.length);
       } else {
         final int prefixLength = StringHelper.bytesDifference(previous.get(), term);
