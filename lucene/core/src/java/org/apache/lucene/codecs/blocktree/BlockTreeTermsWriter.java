@@ -212,9 +212,9 @@ public final class BlockTreeTermsWriter extends FieldsConsumer {
 
   //private final static boolean SAVE_DOT_FILES = false;
 
-  private final IndexOutput metaOut;
-  private final IndexOutput termsOut;
-  private final IndexOutput indexOut;
+  private final IndexOutput metaOut;  // .tmd
+  private final IndexOutput termsOut;  // .tim
+  private final IndexOutput indexOut;  // .tip
   final int maxDoc;
   final int minItemsInBlock;
   final int maxItemsInBlock;
@@ -412,8 +412,8 @@ public final class BlockTreeTermsWriter extends FieldsConsumer {
       // TODO: try writing the leading vLong in MSB order
       // (opposite of what Lucene does today), for better
       // outputs sharing in the FST
-      scratchBytes.writeVLong(encodeOutput(fp, hasTerms, isFloor));
-      if (isFloor) {
+      scratchBytes.writeVLong(encodeOutput(fp, hasTerms, isFloor)); // 构造non-floor block的FST输出
+      if (isFloor) {  // 构造floor block的FST输出
         scratchBytes.writeVInt(blocks.size()-1);
         for (int i=1;i<blocks.size();i++) {
           PendingBlock sub = blocks.get(i);
@@ -438,11 +438,11 @@ public final class BlockTreeTermsWriter extends FieldsConsumer {
       final byte[] bytes = new byte[(int) scratchBytes.getFilePointer()];
       assert bytes.length > 0;
       scratchBytes.writeTo(bytes, 0);
-      indexBuilder.add(Util.toIntsRef(prefix, scratchIntsRef), new BytesRef(bytes, 0, bytes.length));
+      indexBuilder.add(Util.toIntsRef(prefix, scratchIntsRef), new BytesRef(bytes, 0, bytes.length)); // FST的输入是prefix
       scratchBytes.reset();
 
       // Copy over index for all sub-blocks
-      for(PendingBlock block : blocks) {
+      for(PendingBlock block : blocks) { // 遍历各个子block，把它们的FST汇总到当前block的FST中。
         if (block.subIndices != null) {
           for(FST<BytesRef> subIndex : block.subIndices) {
             append(indexBuilder, subIndex, scratchIntsRef);
@@ -465,7 +465,7 @@ public final class BlockTreeTermsWriter extends FieldsConsumer {
 
     // TODO: maybe we could add bulk-add method to
     // Builder?  Takes FST and unions it w/ current
-    // FST.
+    // FST.  TODO: 这个有空可以试试 ?
     private void append(Builder<BytesRef> builder, FST<BytesRef> subIndex, IntsRefBuilder scratchIntsRef) throws IOException {
       final BytesRefFSTEnum<BytesRef> subIndexEnum = new BytesRefFSTEnum<>(subIndex);
       BytesRefFSTEnum.InputOutput<BytesRef> indexEnt;
@@ -494,7 +494,7 @@ public final class BlockTreeTermsWriter extends FieldsConsumer {
       this.hasFreqs = hasFreqs;
     }
 
-    void add(int df, long ttf) throws IOException {
+    void add(int df, long ttf) throws IOException {  // df: Doc Freq, ttf: Total Term Freq
       // Singletons (DF==1, TTF==1) are run-length encoded
       if (df == 1 && (hasFreqs == false || ttf == 1)) {
         singletonCount++;
@@ -634,7 +634,7 @@ public final class BlockTreeTermsWriter extends FieldsConsumer {
 
       assert firstBlock.isFloor || newBlocks.size() == 1;
 
-      firstBlock.compileIndex(newBlocks, scratchBytes, scratchIntsRef);
+      firstBlock.compileIndex(newBlocks, scratchBytes, scratchIntsRef);  // 构造FST索引
 
       // Remove slice from the top of the pending stack, that we just wrote:
       pending.subList(pending.size()-count, pending.size()).clear();
@@ -662,7 +662,7 @@ public final class BlockTreeTermsWriter extends FieldsConsumer {
      *  we record the starting label of the suffix of each floor block. */
     private PendingBlock writeBlock(int prefixLength, boolean isFloor, int floorLeadLabel, int start, int end,
                                     boolean hasTerms, boolean hasSubBlocks) throws IOException {
-
+// isFloor: 超过maxItemsInBlock数量的term共享同一个前缀，会把这些term拆分到多个floor block中
       assert end > start;
 
       long startFP = termsOut.getFilePointer();
@@ -940,7 +940,7 @@ public final class BlockTreeTermsWriter extends FieldsConsumer {
       for(int i=lastTerm.length()-1;i>=prefixLength;i--) {
 
         // How many items on top of the stack share the current suffix
-        // we are closing:
+        // we are closing:   注意这行注释，说明了生成block的条件。
         int prefixTopSize = pending.size() - prefixStarts[i];
         if (prefixTopSize >= minItemsInBlock) {
           // if (DEBUG) System.out.println("pushTerm i=" + i + " prefixTopSize=" + prefixTopSize + " minItemsInBlock=" + minItemsInBlock);
