@@ -481,7 +481,7 @@ final class SegmentTermsEnum extends BaseTermsEnum {
     while (targetUpto < target.length) {
 
       final int targetLabel = target.bytes[target.offset + targetUpto] & 0xFF;
-
+      // 根据下一个字符，从FST中读下一条边
       final FST.Arc<BytesRef> nextArc = fr.index.findTargetArc(targetLabel, arc, getArc(1+targetUpto), fstReader);
 
       if (nextArc == null) {

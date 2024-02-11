@@ -816,6 +816,8 @@ public final class BlockTreeTermsWriter extends FieldsConsumer {
       // auto-increment IDs, so not compressing in that case helps not hurt ID lookups by too much.
       // We also only start compressing when the prefix length is greater than 2 since blocks whose prefix length is
       // 1 or 2 always all get visited when running a fuzzy query whose max number of edits is 2.
+// TODO: 这里的第二个条件 prefixLength > 2才压缩，主要是为了优化fuzzy query，这个在日志场景可以去掉。
+// TODO: 引入ZSTD level 1-3来提升压缩率？需要评估一下对查询性能的影响。
       if (suffixWriter.length() > 2L * numEntries && prefixLength > 2) {
         // LZ4 inserts references whenever it sees duplicate strings of 4 chars or more, so only try it out if the
         // average suffix length is greater than 6.

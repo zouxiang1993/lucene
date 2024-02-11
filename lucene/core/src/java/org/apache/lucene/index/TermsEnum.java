@@ -76,7 +76,7 @@ public abstract class TermsEnum implements BytesRefIterator {
    *  term was found, or EOF was hit.  The target term may
    *  be before or after the current term.  If this returns
    *  SeekStatus.END, the enum is unpositioned. */
-  public abstract SeekStatus seekCeil(BytesRef text) throws IOException;
+  public abstract SeekStatus seekCeil(BytesRef text) throws IOException; // seek到一个term，或者它的下一个term。
 
   /** Seeks to the specified term by ordinal (position) as
    *  previously returned by {@link #ord}.  The target ord
