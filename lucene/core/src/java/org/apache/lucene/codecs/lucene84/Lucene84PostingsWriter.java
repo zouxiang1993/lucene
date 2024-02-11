@@ -219,7 +219,7 @@ public final class Lucene84PostingsWriter extends PushPostingsWriterBase {
     // Have collected a block of docs, and get a new doc. 
     // Should write skip data as well as postings list for
     // current block.
-    if (lastBlockDocID != -1 && docBufferUpto == 0) {
+    if (lastBlockDocID != -1 && docBufferUpto == 0) { // 产生了一个新的block，在SkipWriter中记录
       skipWriter.bufferSkip(lastBlockDocID, competitiveFreqNormAccumulator, docCount,
           lastBlockPosFP, lastBlockPayFP, lastBlockPosBufferUpto, lastBlockPayloadByteUpto);
       competitiveFreqNormAccumulator.clear();
@@ -353,7 +353,7 @@ public final class Lucene84PostingsWriter extends PushPostingsWriterBase {
     assert state.docFreq == docCount: state.docFreq + " vs " + docCount;
     
     // docFreq == 1, don't write the single docid/freq to a separate file along with a pointer to it.
-    final int singletonDocID;
+    final int singletonDocID; // docFreq == 1时，不会将 docid/freq写到倒排表中，而是直接写到词典中。
     if (state.docFreq == 1) {
       // pulse the singleton docid into the term dictionary, freq is implicitly totalTermFreq
       singletonDocID = (int) docDeltaBuffer[0];
