@@ -320,8 +320,9 @@ public class TieredMergePolicy extends MergePolicy {
 
     long mergingBytes = 0;
 
-    List<SegmentSizeAndDocs> sortedInfos = getSortedBySegmentSize(infos, mergeContext);
+    List<SegmentSizeAndDocs> sortedInfos = getSortedBySegmentSize(infos, mergeContext); // 按segment size从大到小排序。
     Iterator<SegmentSizeAndDocs> iter = sortedInfos.iterator();
+    // 过滤掉已经在merge的segment
     while (iter.hasNext()) {
       SegmentSizeAndDocs segSizeDocs = iter.next();
       final long segBytes = segSizeDocs.sizeInBytes;
@@ -359,7 +360,7 @@ public class TieredMergePolicy extends MergePolicy {
     int tooBigCount = 0;
     iter = sortedInfos.iterator();
 
-    // remove large segments from consideration under two conditions.
+    // remove large segments from consideration under two conditions. 限制大segment的合并。超过 50% maxSegSize = 2.5GB的segment就不会再合并了。
     // 1> Overall percent deleted docs relatively small and this segment is larger than 50% maxSegSize
     // 2> overall percent deleted docs large and this segment is large and has few deleted docs
 
@@ -379,7 +380,7 @@ public class TieredMergePolicy extends MergePolicy {
     // Compute max allowed segments in the index
     long levelSize = Math.max(minSegmentBytes, floorSegmentBytes);
     long bytesLeft = totIndexBytes;
-    double allowedSegCount = 0;
+    double allowedSegCount = 0;  // 下面估算出一个allowedSegCount值
     while (true) {
       final double segCountLevel = bytesLeft / (double) levelSize;
       if (segCountLevel < segsPerTier || levelSize == maxMergedSegmentBytes) {

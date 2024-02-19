@@ -34,7 +34,7 @@ import org.apache.lucene.util.IOUtils;
  */
 public class Stats {
   /** Byte size of the index. */
-  public long indexNumBytes;
+  public long indexNumBytes; // FST的内存占用。现在的FST都是off-heap的，这个值固定都是72
 
   /** Total number of terms in the field. */
   public long totalTermCount;
@@ -47,14 +47,14 @@ public class Stats {
 
   /** The number of floor blocks (meta-blocks larger than the
    *  allowed {@code maxItemsPerBlock}) in the terms file. */
-  public int floorBlockCount;
+  public int floorBlockCount; // 是floor block，且是一批floor block中的第一个
     
   /** The number of sub-blocks within the floor blocks. */
-  public int floorSubBlockCount;
+  public int floorSubBlockCount; // 是floor block。  floorSubBlockCount + nonFloorBlockCount = totalBlockCount
 
   /** The number of "internal" blocks (that have both
    *  terms and sub-blocks). */
-  public int mixedBlockCount;
+  public int mixedBlockCount; // mixedBlockCount + termsOnlyBlockCount + subBlocksOnlyBlockCount = totalBlockCount
 
   /** The number of "leaf" blocks (blocks that have only
    *  terms). */

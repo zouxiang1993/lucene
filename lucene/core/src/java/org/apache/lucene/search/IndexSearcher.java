@@ -573,7 +573,7 @@ public class IndexSearcher {
       final C collector = collectorManager.newCollector();
       search(query, collector);
       return collectorManager.reduce(Collections.singletonList(collector));
-    } else {
+    } else {  // 多线程搜索
       final List<C> collectors = new ArrayList<>(leafSlices.length);
       ScoreMode scoreMode = null;
       for (int i = 0; i < leafSlices.length; ++i) {
