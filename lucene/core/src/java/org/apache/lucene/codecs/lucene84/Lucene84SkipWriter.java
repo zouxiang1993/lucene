@@ -196,7 +196,7 @@ final class Lucene84SkipWriter extends MultiLevelSkipListWriter {
     if (level + 1 < numberOfSkipLevels) {
       curCompetitiveFreqNorms[level + 1].addAll(competitiveFreqNorms);
     }
-    writeImpacts(competitiveFreqNorms, freqNormOut);
+    writeImpacts(competitiveFreqNorms, freqNormOut); // TODO: 这部分在日志场景可以不要？
     skipBuffer.writeVInt(Math.toIntExact(freqNormOut.size()));
     freqNormOut.copyTo(skipBuffer);
     freqNormOut.reset();

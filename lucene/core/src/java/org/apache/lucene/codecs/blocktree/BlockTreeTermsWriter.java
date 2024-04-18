@@ -800,7 +800,7 @@ public final class BlockTreeTermsWriter extends FieldsConsumer {
             assert floorLeadLabel == -1 || (block.prefix.bytes[prefixLength] & 0xff) >= floorLeadLabel: "floorLeadLabel=" + floorLeadLabel + " suffixLead=" + (block.prefix.bytes[prefixLength] & 0xff);
             assert block.fp < startFP;
 
-            suffixLengthsWriter.writeVLong(startFP - block.fp);
+            suffixLengthsWriter.writeVLong(startFP - block.fp); // 对于PendingBlock, 这里还在suffixLength部分记录了block位置的delta
             subIndices.add(block.index);
           }
         }
@@ -906,7 +906,7 @@ public final class BlockTreeTermsWriter extends FieldsConsumer {
       }
       */
 
-      BlockTermState state = postingsWriter.writeTerm(text, termsEnum, docsSeen, norms);
+      BlockTermState state = postingsWriter.writeTerm(text, termsEnum, docsSeen, norms); // 先写倒排表
       if (state != null) {
 
         assert state.docFreq != 0;

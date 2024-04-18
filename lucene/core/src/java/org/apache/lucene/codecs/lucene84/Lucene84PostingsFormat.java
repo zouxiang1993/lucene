@@ -417,13 +417,13 @@ public final class Lucene84PostingsFormat extends PostingsFormat {
 
   @Override
   public FieldsConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
-    PostingsWriterBase postingsWriter = new Lucene84PostingsWriter(state);
+    PostingsWriterBase postingsWriter = new Lucene84PostingsWriter(state); // 倒排表
     boolean success = false;
     try {
       FieldsConsumer ret = new BlockTreeTermsWriter(state, 
                                                     postingsWriter,
                                                     minTermBlockSize, 
-                                                    maxTermBlockSize);
+                                                    maxTermBlockSize); // 词典
       success = true;
       return ret;
     } finally {
@@ -466,7 +466,7 @@ public final class Lucene84PostingsFormat extends PostingsFormat {
     public long skipOffset;
     /** file offset for the last position in the last block, if there are more than
      * {@link ForUtil#BLOCK_SIZE} positions; otherwise -1 */
-    public long lastPosBlockOffset;
+    public long lastPosBlockOffset; // 一个term在.pos文件中可能包含多个block，lastPosBlockOffset记录了最后一个block的结束位置。从下一个位置开始，就是vInts编码的position信息了。
     /** docid when there is a single pulsed posting, otherwise -1.
      * freq is always implicitly totalTermFreq in this case. */
     public int singletonDocID;
