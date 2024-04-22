@@ -1,0 +1,59 @@
+@startuml
+skinparam class{
+    BackgroundColor<<Important>> PaleGreen
+    BorderColor<<Important>> SpringGreen
+}
+
+abstract class DataOutput{
+    为Lucene最底层的各种数据类型执行写操作
+    --
+    +{abstract} void writeByte(byte b)
+    +{abstract} void writeBytes(byte[] b, int offset, int length)
+    +void writeInt(int i)
+    +void writeShort(short i)
+    +void writeVInt(int i)
+    +void writeZInt(int i)
+    +void writeLong(long i)
+    +void writeVLong(long i)
+    +void writeZLong(long i)
+    +void writeString(String s)
+    +void copyBytes(DataInput input, long numBytes)
+    +void writeMapOfStrings(Map<String,String> map)
+    +void writeSetOfStrings(Set<String> set)
+}
+
+abstract class IndexOutput extends DataOutput{
+    // 表示Directory中一个文件的输出
+    ---
+    // 返回当前写的位置
+    +{abstract} long getFilePointer()
+    // 返回到目前为止的checksum
+    +{abstract} long getChecksum()
+}
+
+class RAMOutputStream extends IndexOutput{
+    // 一种在内存中的IndexOutput实现
+}
+
+class OutputStreamIndexOutput<<Important>> extends IndexOutput{
+    // 带缓冲功能的IndexOutput实现，
+    // 将数据写到一个OutputStream中
+}
+
+class RateLimitedIndexOutput extends IndexOutput{
+    // 写速度可控的IndexOutput (装饰类)
+}
+
+class OutputStreamDataOutput extends DataOutput{
+    // 直接写到一个OutputStream中
+}
+
+class ByteArrayDataOutput extends DataOutput{
+    // 将数据写到一个定长的byte[]中
+}
+
+class GrowableByteArrayDataOutput extends DataOutput{
+    // 将数据写到一个可增长的byte[]中
+}
+
+@enduml

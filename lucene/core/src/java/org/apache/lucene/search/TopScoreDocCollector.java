@@ -150,7 +150,7 @@ public abstract class TopScoreDocCollector extends TopDocsCollector<ScoreDoc> {
           if (minScoreAcc != null && (totalHits & minScoreAcc.modInterval) == 0) {
             updateGlobalMinCompetitiveScore(scorer);
           }
-
+          // 分数更大的doc属于之前的page，这里就直接可以不收集了。
           if (score > after.score || (score == after.score && doc <= afterDoc)) {
             // hit was collected on a previous page
             if (totalHitsRelation == TotalHits.Relation.EQUAL_TO) {
