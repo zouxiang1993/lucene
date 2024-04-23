@@ -108,7 +108,7 @@ public final class CompressingStoredFieldsWriter extends StoredFieldsWriter {
     this.chunkSize = chunkSize;
     this.maxDocsPerChunk = maxDocsPerChunk;
     this.docBase = 0;
-    this.bufferedDocs = ByteBuffersDataOutput.newResettableInstance(); // TODO: 看看具体的实现
+    this.bufferedDocs = ByteBuffersDataOutput.newResettableInstance();
     this.numStoredFields = new int[16];
     this.endOffsets = new int[16];
     this.numBufferedDocs = 0;
