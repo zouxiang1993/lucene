@@ -48,7 +48,7 @@ final class PForUtil {
    */
   void encode(long[] longs, DataOutput out) throws IOException {
     // At most 3 exceptions
-    final long[] top4 = new long[4];
+    final long[] top4 = new long[4];  // top4[3] 最大值  top4[2] 第二大  top4[1] 第三大  top4[0] 第四大
     Arrays.fill(top4, -1L);
     for (int i = 0; i < ForUtil.BLOCK_SIZE; ++i) {
       if (longs[i] > top4[0]) {

@@ -710,7 +710,7 @@ public final class Lucene84PostingsReader extends PostingsReaderBase {
     }
 
     private void refillDocs() throws IOException {
-      final int left = docFreq - blockUpto;
+      final int left = docFreq - blockUpto; // 这个term后面还有多少个doc没解析
       assert left >= 0;
 
       if (left >= BLOCK_SIZE) {

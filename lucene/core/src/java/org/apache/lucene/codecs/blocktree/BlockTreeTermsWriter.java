@@ -701,7 +701,7 @@ public final class BlockTreeTermsWriter extends FieldsConsumer {
 
       final List<FST<BytesRef>> subIndices;
 
-      boolean absolute = true;
+      boolean absolute = true; // 每个block中的第1个entry absolute为true，表示各种position都是用的真实值，后续的entry absolute为false，表示各种position都是用的相对位置。
 
       if (isLeafBlock) {
         // Block contains only ordinary terms:

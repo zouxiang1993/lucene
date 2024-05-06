@@ -234,6 +234,7 @@ final class SegmentTermsEnum extends BaseTermsEnum {
   // Pushes a frame we seek'd to
   SegmentTermsEnumFrame pushFrame(FST.Arc<BytesRef> arc, BytesRef frameData, int length) throws IOException {
     scratchReader.reset(frameData.bytes, frameData.offset, frameData.length);
+    // 解析FST的输出
     final long code = scratchReader.readVLong();
     final long fpSeek = code >>> BlockTreeTermsReader.OUTPUT_FLAGS_NUM_BITS;
     final SegmentTermsEnumFrame f = getFrame(1+currentFrame.ord);
@@ -484,7 +485,7 @@ final class SegmentTermsEnum extends BaseTermsEnum {
       // 根据下一个字符，从FST中读下一条边
       final FST.Arc<BytesRef> nextArc = fr.index.findTargetArc(targetLabel, arc, getArc(1+targetUpto), fstReader);
 
-      if (nextArc == null) {
+      if (nextArc == null) { // FST索引已经消耗完毕
 
         // Index is exhausted
         // if (DEBUG) {

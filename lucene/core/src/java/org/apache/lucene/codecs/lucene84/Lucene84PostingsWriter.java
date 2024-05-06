@@ -64,33 +64,33 @@ public final class Lucene84PostingsWriter extends PushPostingsWriterBase {
   IntBlockTermState lastState;
 
   // Holds starting file pointers for current term:
-  private long docStartFP;
+  private long docStartFP;  // 当前term在.doc文件中的起始位置
   private long posStartFP;
   private long payStartFP;
 
-  final long[] docDeltaBuffer;
-  final long[] freqBuffer;
-  private int docBufferUpto;
+  final long[] docDeltaBuffer; // 用于缓存128个doc id (差值编码)
+  final long[] freqBuffer;     // 用户缓存128个freq
+  private int docBufferUpto;   // 表示 docDeltaBuffer 下一个写入的位置，同时也表示 freqBuffer 下一个写入的位置
 
-  final long[] posDeltaBuffer;
+  final long[] posDeltaBuffer;  // 用户缓存128个position (差值编码)
   final long[] payloadLengthBuffer;
   final long[] offsetStartDeltaBuffer;
   final long[] offsetLengthBuffer;
-  private int posBufferUpto;
+  private int posBufferUpto; // 表示 posDeltaBuffer 下一个写入的位置。
 
   private byte[] payloadBytes;
   private int payloadByteUpto;
 
-  private int lastBlockDocID;
-  private long lastBlockPosFP;
+  private int lastBlockDocID;   // 上一个block中的最后一个doc id
+  private long lastBlockPosFP;  // 上一个block在.doc文件中的结束位置
   private long lastBlockPayFP;
   private int lastBlockPosBufferUpto;
   private int lastBlockPayloadByteUpto;
 
-  private int lastDocID;
-  private int lastPosition;
+  private int lastDocID;  // 上一个doc id，主要用于在 docDeltaBuffer 计算相邻两个doc id的差值
+  private int lastPosition; // 上一个position，主要用于计算position delta
   private int lastStartOffset;
-  private int docCount;
+  private int docCount; // 计数: 当前term在多少个doc中出现
 
   private final PForUtil pforUtil;
   private final ForDeltaUtil forDeltaUtil;
@@ -219,7 +219,8 @@ public final class Lucene84PostingsWriter extends PushPostingsWriterBase {
     // Have collected a block of docs, and get a new doc. 
     // Should write skip data as well as postings list for
     // current block.
-    if (lastBlockDocID != -1 && docBufferUpto == 0) { // 产生了一个新的block，在SkipWriter中记录
+    if (lastBlockDocID != -1 && docBufferUpto == 0) {
+      // 在上一个doc就凑够了128，产生了一个新的block。只是在下一次startDoc时走到这里才在跳表中记录。因此这里的变量名为 lastBlockXxx
       skipWriter.bufferSkip(lastBlockDocID, competitiveFreqNormAccumulator, docCount,
           lastBlockPosFP, lastBlockPayFP, lastBlockPosBufferUpto, lastBlockPayloadByteUpto);
       competitiveFreqNormAccumulator.clear();
@@ -239,7 +240,7 @@ public final class Lucene84PostingsWriter extends PushPostingsWriterBase {
     docBufferUpto++;
     docCount++;
 
-    if (docBufferUpto == BLOCK_SIZE) {
+    if (docBufferUpto == BLOCK_SIZE) { // 在.doc中生成一个block
       forDeltaUtil.encodeDeltas(docDeltaBuffer, docOut);
       if (writeFreqs) {
         pforUtil.encode(freqBuffer, docOut);
@@ -306,7 +307,7 @@ public final class Lucene84PostingsWriter extends PushPostingsWriterBase {
     
     posBufferUpto++;
     lastPosition = position;
-    if (posBufferUpto == BLOCK_SIZE) {
+    if (posBufferUpto == BLOCK_SIZE) { // 每到128个position，在.pos文件中生成一个block
       pforUtil.encode(posDeltaBuffer, posOut);
 
       if (writePayloads) {
@@ -334,8 +335,8 @@ public final class Lucene84PostingsWriter extends PushPostingsWriterBase {
         if (payOut != null) {
           lastBlockPayFP = payOut.getFilePointer();
         }
-        lastBlockPosFP = posOut.getFilePointer();
-        lastBlockPosBufferUpto = posBufferUpto;
+        lastBlockPosFP = posOut.getFilePointer(); // 记录在上一次startDoc中生成的block的结束位置
+        lastBlockPosBufferUpto = posBufferUpto;  // 记录上一个block对应的position总数。
         lastBlockPayloadByteUpto = payloadByteUpto;
       }
       docBufferUpto = 0;
