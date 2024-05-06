@@ -1,0 +1,15 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+if (查询FST，能否匹配下一个字符?) then (true)
+  :pushFrame压入一帧;
+else (false)
+endif
+:FST查询结束，得到FST的输出;
+:scanToFloorFrame(如果被拆分成多个floor block，定位到具体的一个);
+:loadBlock(加载block);
+:scanToTerm(定位到block中具体的term);
+stop
+
+@enduml

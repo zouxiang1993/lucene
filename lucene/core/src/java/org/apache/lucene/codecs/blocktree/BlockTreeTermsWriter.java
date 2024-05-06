@@ -975,7 +975,7 @@ public final class BlockTreeTermsWriter extends FieldsConsumer {
         // we can save writing a "degenerate" root block, but we have to
         // fix all the places that assume the root block's prefix is the empty string:
         pushTerm(new BytesRef());
-        writeBlocks(0, pending.size());
+        writeBlocks(0, pending.size()); // 这里pushTerm一个空串，然后writeBlocks生成一个root block，root code就是root block对应的FST输出。
 
         // We better have one final "root" block:
         assert pending.size() == 1 && !pending.get(0).isTerm: "pending.size()=" + pending.size() + " pending=" + pending;

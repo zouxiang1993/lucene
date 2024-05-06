@@ -1,0 +1,33 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+if (已经初始化?) then(true)
+else(false)
+  :加载root block;
+endif
+
+if (当前frame中还有剩余entry?) then(true)
+  :currentFrame.next()\n移动到下一个entry;
+  if (当前entry是term还是block?) then (term)
+    :返回这个term;
+  else (block)
+    :pushFrame;
+    :加载子block，即树的<font color="red">下一层</font>;
+  endif
+else(false)
+  if (是否还有后续的floor block?) then(true)
+    :移动到下一个floor block;
+  else (false)
+    if (是否是根节点?) then(true)
+      :返回null，\n表示后面已经没有term了;
+    else (false)
+      :回退到上一个frame，\n即树的<font color="red">上一层</font>;
+    endif
+  endif
+endif
+
+
+stop
+
+@enduml

@@ -137,7 +137,7 @@ final class SegmentTermsEnumFrame {
     //System.out.println("    loadNextFloorBlock fp=" + fp + " fpEnd=" + fpEnd);
     //}
     assert arc == null || isFloor: "arc=" + arc + " isFloor=" + isFloor;
-    fp = fpEnd;
+    fp = fpEnd; // floor block是相邻的
     nextEnt = -1;
     loadBlock();
   }

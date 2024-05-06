@@ -52,7 +52,7 @@ public final class FieldReader extends Terms implements Accountable {
   final long sumTotalTermFreq;
   final long sumDocFreq;
   final int docCount;
-  final long rootBlockFP;
+  final long rootBlockFP; // root block在.tim中的起始位置
   final BytesRef rootCode;
   final BytesRef minTerm;
   final BytesRef maxTerm;

@@ -41,7 +41,7 @@ final class SegmentTermsEnum extends BaseTermsEnum {
   // Lazy init:
   IndexInput in;
 
-  private SegmentTermsEnumFrame[] stack;
+  private SegmentTermsEnumFrame[] stack; // 每一个frame对应要查找的term中的一个字符
   private final SegmentTermsEnumFrame staticFrame;
   SegmentTermsEnumFrame currentFrame;
   boolean termExists;
@@ -254,7 +254,7 @@ final class SegmentTermsEnum extends BaseTermsEnum {
   SegmentTermsEnumFrame pushFrame(FST.Arc<BytesRef> arc, long fp, int length) throws IOException {
     final SegmentTermsEnumFrame f = getFrame(1+currentFrame.ord);
     f.arc = arc;
-    if (f.fpOrig == fp && f.nextEnt != -1) {
+    if (f.fpOrig == fp && f.nextEnt != -1) { // 需要push的block与当前block的fp相同，即它们是同一个block
       //if (DEBUG) System.out.println("      push reused frame ord=" + f.ord + " fp=" + f.fp + " isFloor?=" + f.isFloor + " hasTerms=" + f.hasTerms + " pref=" + term + " nextEnt=" + f.nextEnt + " targetBeforeCurrentLength=" + targetBeforeCurrentLength + " term.length=" + term.length + " vs prefix=" + f.prefix);
       //if (f.prefix > targetBeforeCurrentLength) {
       if (f.ord > targetBeforeCurrentLength) {
@@ -265,7 +265,7 @@ final class SegmentTermsEnum extends BaseTermsEnum {
         // }
       }
       assert length == f.prefix;
-    } else {
+    } else { // push一个新的block，直接覆盖状态，block中的内容以后再加载 lazy-load
       f.nextEnt = -1;
       f.prefix = length;
       f.state.termBlockOrd = 0;
@@ -935,7 +935,7 @@ final class SegmentTermsEnum extends BaseTermsEnum {
           return null;
         }
         final long lastFP = currentFrame.fpOrig;
-        currentFrame = stack[currentFrame.ord-1];
+        currentFrame = stack[currentFrame.ord-1]; // 回退一个frame。从树的结构来看，则是回退到树的上一层父节点。
 
         if (currentFrame.nextEnt == -1 || currentFrame.lastSubFP != lastFP) {
           // We popped into a frame that's not loaded
