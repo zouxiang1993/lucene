@@ -61,12 +61,12 @@ public abstract class MultiLevelSkipListReader implements Closeable {
   private long skipPointer[];
 
   /**  skipInterval of each level. */
-  private int skipInterval[];
+  private int skipInterval[];  // 每一个skip entry跳过多少个doc
 
   /** Number of docs skipped per level.
    * It's possible for some values to overflow a signed int, but this has been accounted for.
    */
-  private int[] numSkipped;
+  private int[] numSkipped;  // 每一层已经跳过了多少个doc
 
   /** Doc id of current skip entry per level. */
   protected int[] skipDoc;            
@@ -131,10 +131,10 @@ public abstract class MultiLevelSkipListReader implements Closeable {
 
     while (level >= 0) {
       if (target > skipDoc[level]) {
-        if (!loadNextSkip(level)) {
+        if (!loadNextSkip(level)) { // 同一层中遍历到最后一个skip entry
           continue;
         }
-      } else {
+      } else { // 跳转到下一层
         // no more skips on this level, go down one level
         if (level > 0 && lastChildPointer > skipStream[level - 1].getFilePointer()) {
           seekChild(level - 1);
@@ -145,7 +145,7 @@ public abstract class MultiLevelSkipListReader implements Closeable {
     
     return numSkipped[0] - skipInterval[0] - 1;
   }
-  
+  // 加载 #level 层的下一项 skip entry，如果有，返回true；如果没有，返回false
   private boolean loadNextSkip(int level) throws IOException {
     // we have to skip, the target document is greater than the current
     // skip list entry        
