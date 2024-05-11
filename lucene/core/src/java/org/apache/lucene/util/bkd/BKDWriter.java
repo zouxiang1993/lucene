@@ -1573,7 +1573,7 @@ public class BKDWriter implements Closeable {
     } else {
       // Inner node: partition/recurse
 
-      final int splitDim;
+      final int splitDim; // 根据哪一个维度来切分
       if (config.numIndexDims == 1) {
         splitDim = 0;
       } else {

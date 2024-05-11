@@ -63,7 +63,7 @@ public final class BKDConfig {
     this.packedIndexBytesLength = numIndexDims * bytesPerDim;
     this.packedBytesLength = numDims * bytesPerDim;
     // dimensional values (numDims * bytesPerDim) + docID (int)
-    this.bytesPerDoc = this.packedBytesLength + Integer.BYTES;
+    this.bytesPerDoc = this.packedBytesLength + Integer.BYTES; // 加4字节是因为还要保存一个int类型的docID
   }
 
   private static void verifyParams(final int numDims, final int numIndexDims, final int bytesPerDim, final int maxPointsInLeafNode) {
