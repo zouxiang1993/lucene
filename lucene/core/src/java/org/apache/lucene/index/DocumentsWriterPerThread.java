@@ -356,7 +356,7 @@ final class DocumentsWriterPerThread implements Accountable {
       }
       // We clear this here because we already resolved them (private to this segment) when writing postings:
       pendingUpdates.clearDeleteTerms();
-      segmentInfo.setFiles(new HashSet<>(directory.getCreatedFiles()));
+      segmentInfo.setFiles(new HashSet<>(directory.getCreatedFiles())); // 记录这个segment的所有file
 
       final SegmentCommitInfo segmentInfoPerCommit = new SegmentCommitInfo(segmentInfo, 0, flushState.softDelCountOnFlush, -1L, -1L, -1L, StringHelper.randomId());
       if (infoStream.isEnabled("DWPT")) {

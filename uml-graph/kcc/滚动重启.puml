@@ -1,0 +1,24 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+start
+
+note left
+滚动重启
+end note
+
+:选择要操作的节点列表;
+while (列表中还有待处理的节点?) is (true)
+  :选择一个节点;
+  partition #lightGreen 对单个节点的操作 {
+    :关闭ES节点;
+    :等待ES节点关闭完成;
+    :启动ES节点;
+    :等待节点重启成功重新加入集群;
+    :等待集群恢复green;
+    #Red:(可选)人工确认后再操作下一个节点;
+  }
+endwhile (false)
+stop
+
+@enduml

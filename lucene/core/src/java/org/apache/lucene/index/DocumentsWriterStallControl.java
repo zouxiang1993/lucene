@@ -63,7 +63,7 @@ final class DocumentsWriterStallControl {
   
   /**
    * Blocks if documents writing is currently in a stalled state. 
-   * 
+   * 这里如果触发write stall只会休眠1秒，由上层循环来控制是否继续stall
    */
   void waitIfStalled() {
     if (stalled) {

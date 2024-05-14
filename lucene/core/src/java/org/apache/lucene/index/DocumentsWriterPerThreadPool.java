@@ -46,11 +46,11 @@ import org.apache.lucene.util.ThreadInterruptedException;
  * </p>
  */
 final class DocumentsWriterPerThreadPool implements Iterable<DocumentsWriterPerThread>, Closeable {
-
+  // DWPTPool中管理的所有DWPT
   private final Set<DocumentsWriterPerThread> dwpts = Collections.newSetFromMap(new IdentityHashMap<>());
-  private final Deque<DocumentsWriterPerThread> freeList = new ArrayDeque<>();
-  private final Supplier<DocumentsWriterPerThread> dwptFactory;
-  private int takenWriterPermits = 0;
+  private final Deque<DocumentsWriterPerThread> freeList = new ArrayDeque<>(); // 当前空闲的DWPT
+  private final Supplier<DocumentsWriterPerThread> dwptFactory; // 生成新的DWPT的工厂
+  private int takenWriterPermits = 0; // 是否允许产生新的DWPT
   private boolean closed;
 
 
@@ -65,7 +65,7 @@ final class DocumentsWriterPerThreadPool implements Iterable<DocumentsWriterPerT
     return dwpts.size();
   }
 
-  synchronized void lockNewWriters() {
+  synchronized void lockNewWriters() { // 调用后阻塞所有写入线程创建新的DWPT #newWriter
     // this is similar to a semaphore - we need to acquire all permits ie. takenWriterPermits must be == 0
     // any call to lockNewWriters() must be followed by unlockNewWriters() otherwise we will deadlock at some
     // point

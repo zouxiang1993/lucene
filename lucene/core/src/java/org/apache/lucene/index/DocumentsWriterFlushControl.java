@@ -51,19 +51,19 @@ final class DocumentsWriterFlushControl implements Accountable, Closeable {
   private volatile int numPending = 0;
   private int numDocsSinceStalled = 0; // only with assert
   private final AtomicBoolean flushDeletes = new AtomicBoolean(false);
-  private boolean fullFlush = false;
+  private boolean fullFlush = false; // 仅在上层调用 flush, forceMerge, addIndexes 时为true
   private boolean fullFlushMarkDone = false; // only for assertion that we don't get stale DWPTs from the pool
   // The flushQueue is used to concurrently distribute DWPTs that are ready to be flushed ie. when a full flush is in
   // progress. This might be triggered by a commit or NRT refresh. The trigger will only walk all eligible DWPTs and
   // mark them as flushable putting them in the flushQueue ready for other threads (ie. indexing threads) to help flushing
   private final Queue<DocumentsWriterPerThread> flushQueue = new LinkedList<>();
   // only for safety reasons if a DWPT is close to the RAM limit
-  private final Queue<DocumentsWriterPerThread> blockedFlushes = new LinkedList<>();
+  private final Queue<DocumentsWriterPerThread> blockedFlushes = new LinkedList<>(); // 仅在full flush时使用
   // flushingWriters holds all currently flushing writers. There might be writers in this list that
   // are also in the flushQueue which means that writers in the flushingWriters list are not necessarily
   // already actively flushing. They are only in the state of flushing and might be picked up in the future by
   // polling the flushQueue
-  private final List<DocumentsWriterPerThread> flushingWriters = new ArrayList<>();
+  private final List<DocumentsWriterPerThread> flushingWriters = new ArrayList<>(); // 正在flush的
 
   private double maxConfiguredRamBuffer = 0;
   private long peakActiveBytes = 0;// only with assert
@@ -91,7 +91,6 @@ final class DocumentsWriterFlushControl implements Accountable, Closeable {
   public synchronized long activeBytes() {
     return activeBytes;
   }
-
   long getFlushingBytes() {
     return flushBytes;
   }
@@ -175,11 +174,11 @@ final class DocumentsWriterFlushControl implements Accountable, Closeable {
       commitPerThreadBytes(perThread);  // 统计 flushBytes & activeBytes
       if (!perThread.isFlushPending()) {
         if (isUpdate) {
-          flushPolicy.onUpdate(this, perThread);
+          flushPolicy.onUpdate(this, perThread); // 通过FlushPolicy来决定是否需要flush
         } else {
           flushPolicy.onInsert(this, perThread);
         }
-        if (!perThread.isFlushPending() && perThread.ramBytesUsed() > hardMaxBytesPerDWPT) {
+        if (!perThread.isFlushPending() && perThread.ramBytesUsed() > hardMaxBytesPerDWPT) { // DWPT到达hardMaxBytesPerDWPT，强制flush
           // Safety check to prevent a single DWPT exceeding its RAM limit. This
           // is super important since we can not address more than 2048 MB per DWPT
           setFlushPending(perThread);
@@ -248,7 +247,7 @@ final class DocumentsWriterFlushControl implements Accountable, Closeable {
   private boolean updateStallState() {
     
     assert Thread.holdsLock(this);
-    final long limit = stallLimitBytes(); // 默认配置是16M
+    final long limit = stallLimitBytes(); // 默认配置是16M * 2 = 32M
     /*
      * we block indexing threads if net byte grows due to slow flushes
      * yet, for small ram buffers and large documents we can easily
