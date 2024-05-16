@@ -239,11 +239,11 @@ final class DocumentsWriterPerThread implements Accountable {
       assert deleteSlice.isTail(deleteNode) : "expected the delete term as the tail item";
       deleteSlice.apply(pendingUpdates, docIdUpTo);
       return seqNo;
-    } else {
+    } else { // 当前DWPT没有delete，但是其他线程可能有新的delete，这些delete也需要apply到当前DWPT
       seqNo = deleteQueue.updateSlice(deleteSlice);
-      if (seqNo < 0) {
+      if (seqNo < 0) { // 其他线程有新的delete
         seqNo = -seqNo;
-        deleteSlice.apply(pendingUpdates, docIdUpTo);
+        deleteSlice.apply(pendingUpdates, docIdUpTo); // docIdUpTo: 只应用到这个segment之前写入的文档，不会应用到之后写入的文档！！！
       } else {
         deleteSlice.reset();
       }
@@ -355,7 +355,7 @@ final class DocumentsWriterPerThread implements Accountable {
         assert flushState.segmentInfo.maxDoc() >= flushState.softDelCountOnFlush + flushState.delCountOnFlush;
       }
       // We clear this here because we already resolved them (private to this segment) when writing postings:
-      pendingUpdates.clearDeleteTerms();
+      pendingUpdates.clearDeleteTerms(); // 在flush写倒排索引时，已经处理了DWPT私有BufferedUpdates中的delete by term部分。delete by qeury 和 field update还没有处理
       segmentInfo.setFiles(new HashSet<>(directory.getCreatedFiles())); // 记录这个segment的所有file
 
       final SegmentCommitInfo segmentInfoPerCommit = new SegmentCommitInfo(segmentInfo, 0, flushState.softDelCountOnFlush, -1L, -1L, -1L, StringHelper.randomId());

@@ -2771,14 +2771,14 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable,
       }
 
       if (globalPacket != null && globalPacket.any()) {
-        publishFrozenUpdates(globalPacket);
+        publishFrozenUpdates(globalPacket); // publish全局的update
       }
 
       // Publishing the segment must be sync'd on IW -> BDS to make the sure
       // that no merge prunes away the seg. private delete packet
       final long nextGen;
       if (packet != null && packet.any()) {
-        nextGen = publishFrozenUpdates(packet);
+        nextGen = publishFrozenUpdates(packet); // publish私有的update
       } else {
         // Since we don't have a delete packet to apply we can get a new
         // generation right away
@@ -5619,7 +5619,7 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable,
         BufferedUpdatesStream.SegmentState[] segStates;
 
         synchronized (this) {
-          List<SegmentCommitInfo> infos = getInfosToApply(updates); // 先理解为这里会对之前所有的segment进行apply
+          List<SegmentCommitInfo> infos = getInfosToApply(updates); // 选出哪些segment需要apply
           if (infos == null) {
             break;
           }

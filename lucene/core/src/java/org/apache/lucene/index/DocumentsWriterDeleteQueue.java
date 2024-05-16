@@ -274,7 +274,7 @@ final class DocumentsWriterDeleteQueue implements Accountable, Closeable {
   DeleteSlice newSlice() {
     return new DeleteSlice(tail);
   }
-
+  // 如果slice的tail与当前队列的tail不一致，说明有新的delete，这时会更新slice的tail，返回一个 -seqNo; 否则返回一个正数的seqNo
   /** Negative result means there were new deletes since we last applied */
   synchronized long updateSlice(DeleteSlice slice) {
     ensureOpen();
@@ -286,7 +286,7 @@ final class DocumentsWriterDeleteQueue implements Accountable, Closeable {
     }
     return seqNo;
   }
-
+  // 同上，但不会生成seqNo，返回的是true和false
   /** Just like updateSlice, but does not assign a sequence number */
   boolean updateSliceNoSeqNo(DeleteSlice slice) {
     if (slice.sliceTail != tail) {
