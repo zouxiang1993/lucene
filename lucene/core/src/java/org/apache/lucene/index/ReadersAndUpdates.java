@@ -76,7 +76,7 @@ final class ReadersAndUpdates {
 
   // Holds resolved (to docIDs) doc values updates that have not yet been
   // written to the index
-  private final Map<String,List<DocValuesFieldUpdates>> pendingDVUpdates = new HashMap<>();
+  private final Map<String,List<DocValuesFieldUpdates>> pendingDVUpdates = new HashMap<>(); // key是字段名
 
   // Holds resolved (to docIDs) doc values updates that were resolved while
   // this segment was being merged; at the end of the merge we carry over

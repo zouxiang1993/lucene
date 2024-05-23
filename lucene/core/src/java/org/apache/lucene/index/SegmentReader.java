@@ -48,18 +48,18 @@ public final class SegmentReader extends CodecReader {
   // this is the original SI that IW uses internally but it's mutated behind the scenes
   // and we don't want this SI to be used for anything. Yet, IW needs this to do maintainance
   // and lookup pooled readers etc.
-  private final SegmentCommitInfo originalSi; // TODO: 看看这里为什么要区分si和originalSi
+  private final SegmentCommitInfo originalSi;
   private final LeafMetaData metaData;
-  private final Bits liveDocs;
-  private final Bits hardLiveDocs;
+  private final Bits liveDocs; // TODO: 考虑delete和soft delete ?
+  private final Bits hardLiveDocs; // TODO: 只考虑 delete ?
 
   // Normally set to si.maxDoc - si.delDocCount, unless we
   // were created as an NRT reader from IW, in which case IW
   // tells us the number of live docs:
   private final int numDocs;
 
-  final SegmentCoreReaders core;
-  final SegmentDocValues segDocValues;
+  final SegmentCoreReaders core; // 不可变的部分
+  final SegmentDocValues segDocValues; // 与commit绑定的可变部分: generation --> docvalues 的映射
 
   /** True if we are holding RAM only liveDocs or DV updates, i.e. the SegmentCommitInfo delGen doesn't match our liveDocs. */
   final boolean isNRT;

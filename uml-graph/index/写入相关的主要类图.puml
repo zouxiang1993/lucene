@@ -1,0 +1,118 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class SegmentInfos {
+  表示多个segment的集合
+  ---
+  - List<SegmentCommitInfo> segments
+  // 用来生成"segments_N"中的N
+  - long generation
+  // 递增，用来生成新segment的name
+  - long counter
+  - Map<String,String> userData
+}
+
+class SegmentCommitInfo {
+  描述一个segment中<font color="red">可变部分</font>的信息
+  每次commit都可能发生变化
+  ---
+  // 不可变的部分
+  - SegmentInfo info
+  - int delCount
+  - int softDelCount
+  // field info, delete, docvalues这三部分是可变的
+  // 每次commit时如果有变更都会递增版本号gen
+  // 每个segment的gen都是独立的
+  - long delGen
+  - long fieldInfosGen
+  - long docValuesGen
+  - Map<Integer,Set<String>> dvUpdatesFiles
+  - Set<String> fieldInfosFiles
+}
+
+class SegmentInfo {
+  描述一个segment中的<font color="red">不可变部分</font>的信息
+  ---
+  - String name
+  - int maxDoc
+  - boolean isCompoundFile
+  - Codec codec
+  - Sort indexSort
+  - Map<String,String> diagnostics
+  - Map<String,String> attributes
+}
+
+SegmentInfos "1" *-right-- "n" SegmentCommitInfo
+SegmentCommitInfo "1" *-right-- "1" SegmentInfo
+
+
+class SegmentCoreReaders {
+  对倒排索引、points、stored fields等不可变部分的reader
+  ---
+  - FieldsProducer fields;
+  - NormsProducer normsProducer;
+  - StoredFieldsReader fieldsReaderOrig;
+  - TermVectorsReader termVectorsReaderOrig;
+  - PointsReader pointsReader;
+  - CompoundDirectory cfsReader;
+  // 最初写入这个segment时看到的FieldInfo，gen=-1
+  // 如果DocValues有更新，SegmentReader可能会持有一个更新的版本
+  final FieldInfos coreFieldInfos;
+}
+
+class SegmentReader {
+  ---
+  - boolean isNRT
+  // 不可变部分
+  - SegmentCoreReaders core
+  // 与commit绑定的可变部分
+  // DocValues
+  - SegmentDocValues segDocValues
+  - DocValuesProducer docValuesProducer
+  // delete: 考虑 delete & soft delete
+  - Bits liveDocs
+  // delete: 只考虑soft delete
+  - Bits hardLiveDocs
+  // 字段信息
+  - FieldInfos fieldInfos
+}
+
+class ReadersAndUpdates {
+  持有一个SegmentReader，并在内存中保存
+  这个segment对应peding delete & update
+  ---
+  - SegmentCommitInfo info
+  - SegmentReader reader
+  - PendingDeletes pendingDeletes
+  - Map<String,List<DocValuesFieldUpdates
+    >> pendingDVUpdates
+}
+
+class ReaderPool {
+  - Map<SegmentCommitInfo,ReadersAndUpdates> readerMap
+}
+
+class SegmentDocValues {
+}
+
+SegmentReader "1" *-right-- "1" SegmentCoreReaders
+SegmentReader "1" *-right-- "1" SegmentDocValues
+ReadersAndUpdates "1" *-right-- "1" SegmentReader
+ReaderPool "1" *-right-- "n" ReadersAndUpdates
+
+
+SegmentInfo -down.. SegmentCoreReaders : segment级
+SegmentCommitInfo -down.. SegmentReader : segment与一个commit绑定
+SegmentInfos -down.. ReaderPool : index级
+
+SegmentCoreReaders -[hidden]down-- SegmentDocValues
+
+
+class IndexWriter {
+  - SegmentInfos
+  - ReaderPool
+}
+
+IndexWriter "1" *-right-- "1" SegmentInfos
+IndexWriter "1" *-right-- "1" ReaderPool
+@enduml

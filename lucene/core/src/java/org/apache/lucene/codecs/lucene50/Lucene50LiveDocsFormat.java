@@ -93,7 +93,7 @@ public final class Lucene50LiveDocsFormat extends LiveDocsFormat {
   @Override
   public void writeLiveDocs(Bits bits, Directory dir, SegmentCommitInfo info, int newDelCount, IOContext context) throws IOException {
     long gen = info.getNextDelGen();
-    String name = IndexFileNames.fileNameFromGeneration(info.info.name, EXTENSION, gen);
+    String name = IndexFileNames.fileNameFromGeneration(info.info.name, EXTENSION, gen); // _segName_gen.liv
     int delCount = 0;
     try (IndexOutput output = dir.createOutput(name, context)) {
       CodecUtil.writeIndexHeader(output, CODEC_NAME, VERSION_CURRENT, info.info.getId(), Long.toString(gen, Character.MAX_RADIX));
