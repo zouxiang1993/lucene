@@ -60,6 +60,7 @@ final class ByteBufferGuard {
   }
   
   /**
+   * 这个方法的注释比较有意思
    * Invalidates this guard and unmaps (if supported).
    */
   public void invalidateAndUnmap(ByteBuffer... bufs) throws IOException {

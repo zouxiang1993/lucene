@@ -49,7 +49,8 @@ import org.apache.lucene.util.IOUtils;
  *
  * @lucene.experimental
  */
-
+// 合并两个Directory。所有的文件操作都必须提供文件名，不同后缀的文件落到不同的Directory中。
+// 好像并没有用到？
 public class FileSwitchDirectory extends Directory {
   private final Directory secondaryDir;
   private final Directory primaryDir;

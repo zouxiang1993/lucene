@@ -34,6 +34,7 @@ public class TestFilterDirectory extends BaseDirectoryTestCase {
   
   @Test
   public void testOverrides() throws Exception {
+    // 这个测试是为了在以后Directory中增加了新的方法时，提醒也要同时补充FilterDirectory。
     // verify that all methods of Directory are overridden by FilterDirectory,
     // except those under the 'exclude' list
     Set<Method> exclude = new HashSet<>();

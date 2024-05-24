@@ -260,6 +260,7 @@ public abstract class FSDirectory extends BaseDirectory {
     maybeDeletePendingFiles();
     while (true) {
       try {
+        // 临时文件命名: _segName_suffix_文件编号.tmp
         String name = getTempFileName(prefix, suffix, nextTempFileCounter.getAndIncrement());
         if (pendingDeletes.contains(name)) {
           continue;
@@ -418,7 +419,7 @@ public abstract class FSDirectory extends BaseDirectory {
             offset += chunk;
           }
         }
-      }, CHUNK_SIZE);
+      }, CHUNK_SIZE); // 8kb的写缓冲区
     }
   }
 

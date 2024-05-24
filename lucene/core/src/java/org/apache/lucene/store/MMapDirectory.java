@@ -98,7 +98,7 @@ public class MMapDirectory extends FSDirectory {
    * Default max chunk size.
    * @see #MMapDirectory(Path, LockFactory, int)
    */
-  public static final int DEFAULT_MAX_CHUNK_SIZE = Constants.JRE_IS_64BIT ? (1 << 30) : (1 << 28);
+  public static final int DEFAULT_MAX_CHUNK_SIZE = Constants.JRE_IS_64BIT ? (1 << 30) : (1 << 28); // 1G / 256M
   final int chunkSizePower;
 
   /** Create a new MMapDirectory for the named location.

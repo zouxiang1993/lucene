@@ -82,7 +82,7 @@ public final class BytesRef implements Comparable<BytesRef>, Cloneable {
    */
   public BytesRef(CharSequence text) {
     this(new byte[UnicodeUtil.maxUTF8Length(text.length())]);
-    length = UnicodeUtil.UTF16toUTF8(text, 0, text.length(), bytes);
+    length = UnicodeUtil.UTF16toUTF8(text, 0, text.length(), bytes); // java string是UTF16编码，这里转成UTF8编码
   }
   
   /**

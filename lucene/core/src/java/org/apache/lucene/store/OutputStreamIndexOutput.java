@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedOutputStream;
 
+// 通过BufferedOutputStream来提供写入缓冲区的功能，默认的bufferSize是8KB。见FSDirectory#FSIndexOutput
 /** Implementation class for buffered {@link IndexOutput} that writes to an {@link OutputStream}. */
 public class OutputStreamIndexOutput extends IndexOutput {
 

@@ -271,7 +271,7 @@ public abstract class DataInput implements Cloneable {
   @Override
   public DataInput clone() {
     try {
-      return (DataInput) super.clone();
+      return (DataInput) super.clone(); // Object.clone 浅拷贝。子类必须正确实现clone
     } catch (CloneNotSupportedException e) {
       throw new Error("This cannot happen: Failing to clone DataInput");
     }

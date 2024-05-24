@@ -77,7 +77,7 @@ public abstract class ByteBufferIndexInput extends IndexInput implements RandomA
   @Override
   public final byte readByte() throws IOException {
     try {
-      return guard.getByte(curBuf);
+      return guard.getByte(curBuf); // 为什么不是get之前用if检查，而是在异常发生以后catch再切换buffer？是出于性能上的考虑？
     } catch (BufferUnderflowException e) {
       do {
         curBufIndex++;
