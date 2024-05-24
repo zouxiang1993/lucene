@@ -57,7 +57,7 @@ public class Lucene87Codec extends Codec {
   private final TermVectorsFormat vectorsFormat = new Lucene50TermVectorsFormat();
   private final FieldInfosFormat fieldInfosFormat = new Lucene60FieldInfosFormat();
   private final SegmentInfoFormat segmentInfosFormat = new Lucene86SegmentInfoFormat();
-  private final LiveDocsFormat liveDocsFormat = new Lucene50LiveDocsFormat();  // DONE: 全部读入内存FixedBitSet，每个文档一个bit
+  private final LiveDocsFormat liveDocsFormat = new Lucene50LiveDocsFormat();
   private final CompoundFormat compoundFormat = new Lucene50CompoundFormat();
   private final PointsFormat pointsFormat = new Lucene86PointsFormat();
   private final PostingsFormat defaultFormat;
@@ -76,7 +76,7 @@ public class Lucene87Codec extends Codec {
     }
   };
 
-  private final StoredFieldsFormat storedFieldsFormat;   // TODO:
+  private final StoredFieldsFormat storedFieldsFormat;
 
   /**
    * Instantiates a new codec.

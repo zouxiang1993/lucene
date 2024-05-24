@@ -77,7 +77,7 @@ public final class FieldsIndexWriter implements Closeable {
     boolean success = false;
     try {
       CodecUtil.writeHeader(docsOut, codecName + "Docs", VERSION_CURRENT);
-      filePointersOut = dir.createTempOutput(name, codecName + "file_pointers", ioContext);
+      filePointersOut = dir.createTempOutput(name, codecName + "file_pointers", ioContext); // 写入过程中的临时文件
       CodecUtil.writeHeader(filePointersOut, codecName + "FilePointers", VERSION_CURRENT);
       success = true;
     } finally {
@@ -111,7 +111,7 @@ public final class FieldsIndexWriter implements Closeable {
       metaOut.writeInt(blockShift);
       metaOut.writeInt(totalChunks + 1);
 // 将 每个chunk的第一个id doc-ids 写入 .fdm & .fdx
-      metaOut.writeLong(dataOut.getFilePointer());
+      metaOut.writeLong(dataOut.getFilePointer()); // .fdx中docBases的起始位置
 
       try (ChecksumIndexInput docsIn = dir.openChecksumInput(docsOut.getName(), IOContext.READONCE)) {
         CodecUtil.checkHeader(docsIn, codecName + "Docs", VERSION_CURRENT, VERSION_CURRENT);

@@ -482,7 +482,7 @@ public final class IOUtils {
       }
     }
   }
-
+// 用来区分磁盘类型: true --> SSD, false --> HDD/无法确定
   /** If the dir is an {@link FSDirectory} or wraps one via possibly
    *  nested {@link FilterDirectory} or {@link FileSwitchDirectory},
    *  this returns {@link #spins(Path)} for the wrapped directory,

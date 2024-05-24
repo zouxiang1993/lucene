@@ -162,7 +162,7 @@ public final class CompressingStoredFieldsWriter extends StoredFieldsWriter {
       endOffsets = ArrayUtil.growExact(endOffsets, newLength);
     }
     this.numStoredFields[numBufferedDocs] = numStoredFieldsInDoc;
-    numStoredFieldsInDoc = 0; // 这里为什么用numStoredFieldsInDoc来记录文档中的字段数，而不是直接在numStoredFields[numBufferedDocs]中累加呢？是因为这样访存速度会更快吗？
+    numStoredFieldsInDoc = 0;
     endOffsets[numBufferedDocs] = Math.toIntExact(bufferedDocs.size()); // 记录每个doc在chunk内的结束位置
     ++numBufferedDocs;
     if (triggerFlush()) {
