@@ -137,7 +137,7 @@ public final class DirectMonotonicReader extends LongValues implements Accountab
   public long get(long index) {
     final int block = (int) (index >>> blockShift);
     final long blockIndex = index & ((1 << blockShift) - 1);
-    final long delta = readers[block].get(blockIndex);
+    final long delta = readers[block].get(blockIndex); // 每次get()调用涉及一次对indexInput的read调用
     return mins[block] + (long) (avgs[block] * blockIndex) + delta;
   }
 
@@ -177,7 +177,7 @@ public final class DirectMonotonicReader extends LongValues implements Accountab
       } else if (bounds[0] > key) {
         hi = mid - 1;
       } else {
-        final long midVal = get(mid);
+        final long midVal = get(mid); // 可能涉及多次read调用。TODO: 应该有优化的空间？先根据内存meta定位到1个block，再读这个block的数据？
         if (midVal < key) {
           lo = mid + 1;
         } else if (midVal > key) {

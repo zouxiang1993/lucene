@@ -66,7 +66,8 @@ import org.apache.lucene.util.RamUsageEstimator;
  * @see ServiceLoader
  * @lucene.experimental
  */
-
+// 支持对不同field设置不同format的能力。不同format的字段存储在不同的索引文件中。
+// 并且为每种PostingFormat赋值一个唯一的suffix，体现在索引文件名中。 例如: _segName_codec_suffix.tim
 public abstract class PerFieldPostingsFormat extends PostingsFormat {
   /** Name of this {@link PostingsFormat}. */
   public static final String PER_FIELD_NAME = "PerField40";
@@ -147,7 +148,7 @@ public abstract class PerFieldPostingsFormat extends PostingsFormat {
     }
 
     @Override
-    public void write(Fields fields, NormsProducer norms) throws IOException { // 支持对不同field设置不同format的能力。一种format只构造一个实例。
+    public void write(Fields fields, NormsProducer norms) throws IOException {
       Map<PostingsFormat, FieldsGroup> formatToGroups = buildFieldsGroupMapping(fields);
 
       // Write postings

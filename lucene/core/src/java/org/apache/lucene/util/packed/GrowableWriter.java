@@ -21,7 +21,8 @@ import java.io.IOException;
 
 import org.apache.lucene.store.DataOutput;
 import org.apache.lucene.util.RamUsageEstimator;
-
+// 内存数据结构。不需要提前计算 bitsPerValue，可以在写入时动态增长。
+// 但是如果bitsPerValue发生增长，需要重建整个内存数据结构，代价比较大。
 /**     
  * Implements {@link PackedInts.Mutable}, but grows the
  * bit count of the underlying packed ints on-demand.

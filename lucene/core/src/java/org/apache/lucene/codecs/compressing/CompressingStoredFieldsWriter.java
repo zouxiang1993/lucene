@@ -192,7 +192,7 @@ public final class CompressingStoredFieldsWriter extends StoredFieldsWriter {
         }
         final int bitsRequired = PackedInts.bitsRequired(max);
         out.writeVInt(bitsRequired);
-        final PackedInts.Writer w = PackedInts.getWriterNoHeader(out, PackedInts.Format.PACKED, length, bitsRequired, 1);
+        final PackedInts.Writer w = PackedInts.getWriterNoHeader(out, PackedInts.Format.PACKED, length, bitsRequired, 1); // TODO: 选择其他PackedInts类型，提取出一个最小值min？
         for (int i = 0; i < length; ++i) {
           w.add(values[i]);
         }

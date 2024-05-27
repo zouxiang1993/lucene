@@ -277,7 +277,7 @@ public class Builder<T> {
     for(int idx=lastInput.length(); idx >= downTo; idx--) {
 
       boolean doPrune = false;
-      boolean doCompile = false;
+      boolean doCompile = false; // 先假设 doPrune一直为false， doCompile一直为true来看。
 
       final UnCompiledNode<T> node = frontier[idx];
       final UnCompiledNode<T> parent = frontier[idx-1];
@@ -460,7 +460,7 @@ public class Builder<T> {
     }
 
     final UnCompiledNode<T> lastNode = frontier[input.length];
-    if (lastInput.length() != input.length || prefixLenPlus1 != input.length + 1) {
+    if (lastInput.length() != input.length || prefixLenPlus1 != input.length + 1) { // 相当于判断 lastInput.equals(input) == false
       lastNode.isFinal = true;
       lastNode.output = NO_OUTPUT;
     }

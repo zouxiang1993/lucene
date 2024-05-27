@@ -24,7 +24,7 @@ import org.apache.lucene.index.SegmentCommitInfo;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.IOContext;
 import org.apache.lucene.util.Bits;
-
+// Bits中，1表示doc存活(没有删除)；0表示doc不存活(已经删除)
 /** Format for live/deleted documents
  * @lucene.experimental */
 public abstract class LiveDocsFormat {
