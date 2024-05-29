@@ -288,7 +288,7 @@ final public class Automata {
       // max < min
       return makeEmpty();
     }
-
+// 例如: abc ~ abc\0\0 ，比较少见的情况。
     if (max != null &&
         StringHelper.startsWith(max, min) &&
         suffixIsZeros(max, min.length)) {
@@ -368,7 +368,7 @@ final public class Automata {
 
       if (equalPrefix) {
 
-        if (minLabel == maxLabel) {
+        if (minLabel == maxLabel) { // min & max 的共同前缀部分
           // Still in shared prefix
           a.addTransition(lastState, nextState, minLabel);
         } else if (max == null) {

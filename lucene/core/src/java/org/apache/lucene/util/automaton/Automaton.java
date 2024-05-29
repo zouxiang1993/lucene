@@ -243,7 +243,7 @@ public class Automaton implements Accountable {
     destMinMaxSorter.sort(start, start+numTransitions);
 
     // Reduce any "adjacent" transitions:
-    int upto = 0;
+    int upto = 0; // upto表示合并相邻元素之后的transitions数量。
     int min = -1;
     int max = -1;
     int dest = -1;
@@ -253,8 +253,8 @@ public class Automaton implements Accountable {
       int tMin = transitions[offset+3*i+1];
       int tMax = transitions[offset+3*i+2];
 
-      if (dest == tDest) {
-        if (tMin <= max+1) {
+      if (dest == tDest) { // 相邻的两个transitions具有相同的src和dest
+        if (tMin <= max+1) { // 判断两段 [min,max] 是否相交
           if (tMax > max) {
             max = tMax;
           }
@@ -299,7 +299,7 @@ public class Automaton implements Accountable {
       int lastMax = transitions[offset+2];
       for(int i=1;i<upto;i++) {
         min = transitions[offset + 3*i + 1];
-        if (min <= lastMax) {
+        if (min <= lastMax) { // 意味着一个从一个src状态接收1个label，可能到达多个dest状态。
           deterministic = false;
           break;
         }
