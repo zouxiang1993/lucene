@@ -50,7 +50,7 @@ public abstract class PostingsWriterBase implements Closeable {
    *  added.  Implementations typically write a header to
    *  the provided {@code termsOut}. */
   public abstract void init(IndexOutput termsOut, SegmentWriteState state) throws IOException;
-
+// 写一个term的倒排表
   /** Write all postings for one term; use the provided
    *  {@link TermsEnum} to pull a {@link org.apache.lucene.index.PostingsEnum}.
    *  This method should not
@@ -61,7 +61,7 @@ public abstract class PostingsWriterBase implements Closeable {
    *  were written, this method should return null, and the
    *  terms dict will skip the term. */
   public abstract BlockTermState writeTerm(BytesRef term, TermsEnum termsEnum, FixedBitSet docsSeen, NormsProducer norms) throws IOException;
-
+// 将一个term的倒排表的meta信息encode到out中，out是BlockTreeWriter的tim文件
   /**
    * Encode metadata as long[] and byte[]. {@code absolute} controls whether 
    * current term is delta encoded according to latest term. 

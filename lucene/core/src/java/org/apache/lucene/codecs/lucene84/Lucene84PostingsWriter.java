@@ -82,7 +82,7 @@ public final class Lucene84PostingsWriter extends PushPostingsWriterBase {
   private int payloadByteUpto;
 
   private int lastBlockDocID;   // 上一个block中的最后一个doc id
-  private long lastBlockPosFP;  // 上一个block在.doc文件中的结束位置
+  private long lastBlockPosFP;  // 上一个block在.pos文件中的结束位置
   private long lastBlockPayFP;
   private int lastBlockPosBufferUpto;
   private int lastBlockPayloadByteUpto;

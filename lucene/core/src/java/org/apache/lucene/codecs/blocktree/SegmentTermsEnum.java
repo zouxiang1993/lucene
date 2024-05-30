@@ -39,7 +39,7 @@ import org.apache.lucene.util.fst.Util;
 final class SegmentTermsEnum extends BaseTermsEnum {
 
   // Lazy init:
-  IndexInput in;
+  IndexInput in; // .tim文件的输入
 
   private SegmentTermsEnumFrame[] stack; // 每一个frame对应要查找的term中的一个字符
   private final SegmentTermsEnumFrame staticFrame;
@@ -321,7 +321,7 @@ final class SegmentTermsEnum extends BaseTermsEnum {
     if (fr.index == null) {
       throw new IllegalStateException("terms index was not loaded");
     }
-
+// 根据min-max索引来剪枝
     if (fr.size() > 0 && (target.compareTo(fr.getMin()) < 0 || target.compareTo(fr.getMax()) > 0)) {
         return false;
     }
@@ -471,7 +471,7 @@ final class SegmentTermsEnum extends BaseTermsEnum {
 
       //term.length = 0;
       targetUpto = 0;
-      currentFrame = pushFrame(arc, BlockTreeTermsReader.FST_OUTPUTS.add(output, arc.nextFinalOutput()), 0);
+      currentFrame = pushFrame(arc, BlockTreeTermsReader.FST_OUTPUTS.add(output, arc.nextFinalOutput()), 0); // 将root block push 入栈
     }
 
     // if (DEBUG) {
@@ -925,7 +925,7 @@ final class SegmentTermsEnum extends BaseTermsEnum {
         break;
       } else {
         //if (DEBUG) System.out.println("  pop frame");
-        if (currentFrame.ord == 0) {
+        if (currentFrame.ord == 0) { // 已经枚举完所有的term了，返回null
           //if (DEBUG) System.out.println("  return null");
           assert setEOF();
           term.clear();

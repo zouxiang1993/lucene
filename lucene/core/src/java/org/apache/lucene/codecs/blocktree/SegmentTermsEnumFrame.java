@@ -45,7 +45,7 @@ final class SegmentTermsEnumFrame {
   // File pointer where this block was loaded from
   long fp;
   long fpOrig;
-  long fpEnd;
+  long fpEnd; // 这个block的结束位置，也就是下一个floor block的起始位置。
   long totalSuffixBytes; // for stats
 
   byte[] suffixBytes = new byte[128];
@@ -59,7 +59,7 @@ final class SegmentTermsEnumFrame {
   final ByteArrayDataInput statsReader = new ByteArrayDataInput();
 
   byte[] floorData = new byte[32];
-  final ByteArrayDataInput floorDataReader = new ByteArrayDataInput();
+  final ByteArrayDataInput floorDataReader = new ByteArrayDataInput(); // floor block 在FST中有特殊的Output
 
   // Length of prefix shared by all terms in this block
   int prefix;
@@ -73,7 +73,7 @@ final class SegmentTermsEnumFrame {
 
   // True if this block is either not a floor block,
   // or, it's the last sub-block of a floor block
-  boolean isLastInFloor;
+  boolean isLastInFloor; // 如果这个block是一批floor block中的最后一个，或者它不是floor block，isLastInFloor字段都为true；反之为false (换个角度理解，isLastInFloor为false表示它后面还跟有其他floor block)
 
   // True if all entries are terms
   boolean isLeafBlock;
@@ -94,7 +94,7 @@ final class SegmentTermsEnumFrame {
 
   // metadata buffer
   byte[] bytes = new byte[32];
-  final ByteArrayDataInput bytesReader = new ByteArrayDataInput();
+  final ByteArrayDataInput bytesReader = new ByteArrayDataInput(); // 变量名用 metaReader更好理解?
 
   private final SegmentTermsEnum ste;
   private final int version;
@@ -257,7 +257,7 @@ final class SegmentTermsEnumFrame {
     //   System.out.println("      fpEnd=" + fpEnd);
     // }
   }
-
+  // 恢复成初始状态。将 nextEnt 设置为-1，表示还未load。下一次使用时lazy load
   void rewind() {
 
     // Force reload:
