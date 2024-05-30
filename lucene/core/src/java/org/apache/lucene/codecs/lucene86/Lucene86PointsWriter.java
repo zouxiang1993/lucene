@@ -118,7 +118,7 @@ public class Lucene86PointsWriter extends PointsWriter implements Closeable {
                                           config,
                                           maxMBSortInHeap,
                                           values.size())) {
-
+// segment flush 时的路径
       if (values instanceof MutablePointValues) {
         Runnable finalizer = writer.writeField(metaOut, indexOut, dataOut, fieldInfo.name, (MutablePointValues) values);
         if (finalizer != null) {
@@ -127,7 +127,7 @@ public class Lucene86PointsWriter extends PointsWriter implements Closeable {
         }
         return;
       }
-
+// segment merge 时的路径
       values.intersect(new IntersectVisitor() {
           @Override
           public void visit(int docID) {

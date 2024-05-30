@@ -36,7 +36,7 @@ class DocIdsWriter {
         break;
       }
     }
-    if (sorted) {
+    if (sorted) { // 如果所有doc id有序，就采用差值编码
       out.writeByte((byte) 0);
       int previous = 0;
       for (int i = 0; i < count; ++i) {
@@ -44,18 +44,18 @@ class DocIdsWriter {
         out.writeVInt(doc - previous);
         previous = doc;
       }
-    } else {
+    } else { // 如果doc id无序  TODO: 直接用 PackedInts 更合适？
       long max = 0;
       for (int i = 0; i < count; ++i) {
         max |= Integer.toUnsignedLong(docIds[start + i]);
       }
-      if (max <= 0xffffff) {
+      if (max <= 0xffffff) { // 3字节
         out.writeByte((byte) 24);
         for (int i = 0; i < count; ++i) {
           out.writeShort((short) (docIds[start + i] >>> 8));
           out.writeByte((byte) docIds[start + i]);
         }
-      } else {
+      } else { // 4字节
         out.writeByte((byte) 32);
         for (int i = 0; i < count; ++i) {
           out.writeInt(docIds[start + i]);

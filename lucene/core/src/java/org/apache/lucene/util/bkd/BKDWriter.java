@@ -342,7 +342,7 @@ public class BKDWriter implements Closeable {
    *  disk. This method does not use transient disk in order to reorder points.
    */
   public Runnable writeField(IndexOutput metaOut, IndexOutput indexOut, IndexOutput dataOut, String fieldName, MutablePointValues reader) throws IOException {
-    if (config.numDims == 1) {
+    if (config.numDims == 1) { // 针对1维数据有特殊的优化
       return writeField1Dim(metaOut, indexOut, dataOut, fieldName, reader);
     } else {
       return writeFieldNDims(metaOut, indexOut, dataOut, fieldName, reader);
@@ -647,7 +647,7 @@ public class BKDWriter implements Closeable {
       leafBlockFPs.add(dataOut.getFilePointer());
       checkMaxLeafNodeCount(leafBlockFPs.size());
 
-      // Find per-dim common prefix:
+      // Find per-dim common prefix:   一个block中，min值和max值的公共前缀，也就是block中所有元素的公共前缀。
       int offset = (leafCount - 1) * config.packedBytesLength;
       int prefix = FutureArrays.mismatch(leafValues, 0, config.bytesPerDim, leafValues, offset, offset + config.bytesPerDim);
       if (prefix == -1) {
@@ -674,7 +674,7 @@ public class BKDWriter implements Closeable {
               ArrayUtil.copyOfSubArray(leafValues, (leafCount - 1) * config.packedBytesLength, leafCount * config.packedBytesLength),
               packedValues, leafDocs, 0);
       writeLeafBlockPackedValues(scratchOut, commonPrefixLengths, leafCount, 0, packedValues, leafCardinality);
-      scratchOut.copyTo(dataOut);
+      scratchOut.copyTo(dataOut); // TODO: 为什么要有这一次拷贝呢？能不能直接往dataOut写？
       scratchOut.reset();
     }
   }
