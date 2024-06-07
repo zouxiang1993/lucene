@@ -103,6 +103,8 @@ public final class TermStates {
       throws IOException {
     assert context != null && context.isTopLevel;
     final TermStates perReaderTermState = new TermStates(needsStats ? null : term, context);
+    // 如果需要打分，就需要从倒排索引中提前获取到docFreq totalTermFreq 等一些统计信息。
+    // 所以这里先seekExact到term，然后保存当前的TermState，后面在获取倒排表的时候可以复用。
     if (needsStats) {
       for (final LeafReaderContext ctx : context.leaves()) {
         //if (DEBUG) System.out.println("  r=" + leaves[i].reader);

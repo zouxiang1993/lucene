@@ -39,6 +39,8 @@ import org.apache.lucene.search.similarities.Similarity;
 public class TermQuery extends Query {
 
   private final Term term;
+  // TermStates是Query与具体索引的联结。仅在构造中传入，用来加速一些特殊场景的查询。
+  // TermStates不应该视为Query本身的一部分，而应该是Weight的一部分。它最终也会被传入到TermWeight中。
   private final TermStates perReaderTermState;
 
   final class TermWeight extends Weight {
@@ -131,13 +133,13 @@ public class TermQuery extends Query {
       assert termStates != null;
       assert termStates.wasBuiltFor(ReaderUtil.getTopLevelContext(context)) :
           "The top-reader used to create Weight is not the same as the current reader's top-reader (" + ReaderUtil.getTopLevelContext(context);
-      final TermState state = termStates.get(context);
+      final TermState state = termStates.get(context); // 这里涉及一次不带state的seekExact
       if (state == null) { // term is not present in that reader
         assert termNotInReader(context.reader(), term) : "no termstate found but term exists in reader term=" + term;
         return null;
       }
       final TermsEnum termsEnum = context.reader().terms(term.field()).iterator();
-      termsEnum.seekExact(term.bytes(), state);
+      termsEnum.seekExact(term.bytes(), state); // 这里涉及一次带TermState的seekExact。TODO: 是否有必要？什么情况下需要重新seek？
       return termsEnum;
     }
 

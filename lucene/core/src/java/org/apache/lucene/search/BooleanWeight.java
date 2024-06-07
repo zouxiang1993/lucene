@@ -60,6 +60,7 @@ final class BooleanWeight extends Weight {
     this.similarity = searcher.getSimilarity();
     weightedClauses = new ArrayList<>();
     for (BooleanClause c : query) {
+      // !!! 对每个子句createWeight，因此QueryCache中既会缓存BooleanQuery的结果，也会缓存每个Clause的结果。
       Weight w = searcher.createWeight(c.getQuery(), c.isScoring() ? scoreMode : ScoreMode.COMPLETE_NO_SCORES, boost);
       weightedClauses.add(new WeightedBooleanClause(c, w));
     }

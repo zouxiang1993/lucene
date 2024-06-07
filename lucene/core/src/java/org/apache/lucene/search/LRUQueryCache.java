@@ -100,7 +100,7 @@ public class LRUQueryCache implements QueryCache, Accountable {
   // are only allowed to store sub-sets of the queries that are contained in
   // mostRecentlyUsedQueries. This is why write operations are performed under a lock
   private final Set<Query> mostRecentlyUsedQueries;
-  private final Map<IndexReader.CacheKey, LeafCache> cache;
+  private final Map<IndexReader.CacheKey, LeafCache> cache; // 两层map, segment --> Query --> DocIdSet
   private final ReentrantLock lock;
   private final float skipCacheFactor;
 
@@ -740,16 +740,16 @@ public class LRUQueryCache implements QueryCache, Accountable {
 
       DocIdSet docIdSet;
       try {
-        docIdSet = get(in.getQuery(), cacheHelper);
+        docIdSet = get(in.getQuery(), cacheHelper); // 在cache中查找
       } finally {
         lock.unlock();
       }
 
-      if (docIdSet == null) {
+      if (docIdSet == null) { // cache未命中
         if (policy.shouldCache(in.getQuery())) {
           final ScorerSupplier supplier = in.scorerSupplier(context);
           if (supplier == null) {
-            putIfAbsent(in.getQuery(), DocIdSet.EMPTY, cacheHelper);
+            putIfAbsent(in.getQuery(), DocIdSet.EMPTY, cacheHelper); // 缓存一个空的DocIdSet
             return null;
           }
 
@@ -764,7 +764,7 @@ public class LRUQueryCache implements QueryCache, Accountable {
 
               Scorer scorer = supplier.get(Long.MAX_VALUE);
               DocIdSet docIdSet = cacheImpl(new DefaultBulkScorer(scorer), context.reader().maxDoc());
-              putIfAbsent(in.getQuery(), docIdSet, cacheHelper);
+              putIfAbsent(in.getQuery(), docIdSet, cacheHelper); // 缓存真实的DocIdSet
               DocIdSetIterator disi = docIdSet.iterator();
               if (disi == null) {
                 // docIdSet.iterator() is allowed to return null when empty but we want a non-null iterator here

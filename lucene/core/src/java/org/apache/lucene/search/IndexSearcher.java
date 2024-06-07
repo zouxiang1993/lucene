@@ -640,6 +640,7 @@ public class IndexSearcher {
    * @throws BooleanQuery.TooManyClauses If a query would exceed 
    *         {@link BooleanQuery#getMaxClauseCount()} clauses.
    */
+// !!! 所有search方法最终都会走到这里
   protected void search(List<LeafReaderContext> leaves, Weight weight, Collector collector)
       throws IOException {
 

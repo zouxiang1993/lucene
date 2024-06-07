@@ -84,7 +84,7 @@ public abstract class Weight implements SegmentCacheable {
    * @param doc     the document's id relative to the given context's reader
    * @lucene.experimental
    */
-  public Matches matches(LeafReaderContext context, int doc) throws IOException {
+  public Matches matches(LeafReaderContext context, int doc) throws IOException { // 是用于高亮功能的，先不关注
     ScorerSupplier scorerSupplier = scorerSupplier(context);
     if (scorerSupplier == null) {
       return null;

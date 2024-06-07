@@ -204,13 +204,13 @@ public abstract class PointValues {
   public interface IntersectVisitor {
     /** Called for all documents in a leaf cell that's fully contained by the query.  The
      *  consumer should blindly accept the docID. */
-    void visit(int docID) throws IOException;
+    void visit(int docID) throws IOException; // 回调这个方法时，说明doc和query一定匹配
 
     /** Called for all documents in a leaf cell that crosses the query.  The consumer
      *  should scrutinize the packedValue to decide whether to accept it.  In the 1D case,
      *  values are visited in increasing order, and in the case of ties, in increasing
      *  docID order. */
-    void visit(int docID, byte[] packedValue) throws IOException;
+    void visit(int docID, byte[] packedValue) throws IOException; // 回调这个方法时，说明doc和query可能匹配，也可能不匹配。还需要上层调用方做进一步的match来判断。
 
     /** Similar to {@link IntersectVisitor#visit(int, byte[])} but in this case the packedValue
      * can have more than one docID associated to it. The provided iterator should not escape the

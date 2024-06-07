@@ -93,7 +93,7 @@ public class UsageTrackingQueryCachingPolicy implements QueryCachingPolicy {
     return false;
   }
 
-  private final FrequencyTrackingRingBuffer recentlyUsedFilters;
+  private final FrequencyTrackingRingBuffer recentlyUsedFilters; // 先简单理解为一个map，key是Query的hash值，value是Query出现的频率。
 
   /**
    * Expert: Create a new instance with a configurable history size. Beware of

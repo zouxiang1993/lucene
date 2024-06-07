@@ -144,7 +144,7 @@ public class BooleanQuery extends Query implements Iterable<BooleanClause> {
     this.minimumNumberShouldMatch = minimumNumberShouldMatch;
     this.clauses = Collections.unmodifiableList(Arrays.asList(clauses));
     clauseSets = new EnumMap<>(Occur.class);
-    // duplicates matter for SHOULD and MUST
+    // duplicates matter for SHOULD and MUST   可能会受minimumShounldMatch影响，也可能影响打分。
     clauseSets.put(Occur.SHOULD, new Multiset<>());
     clauseSets.put(Occur.MUST, new Multiset<>());
     // but not for FILTER and MUST_NOT
